@@ -3,13 +3,10 @@
   "version": "0.0.0-1",
   "description": "Subsonic compatable music server APIs.",
   "type": "module",
-  "main": "./lib/index.js",
-  "directories": {
-    "lib": "lib"
-  },
+  "main": "./server.js",
   "scripts": {
-    "start": "node ./lib/index.js",
-    "lint": "eslint ./lib",
+    "start": "node ./server.js",
+    "lint": "eslint .",
     "prettier": "prettier . --write"
   },
   "author": "Tashi D. Gyeltshen",
