@@ -3,7 +3,7 @@ import User from '../models/userModel.js';
 const login = async (req, res) => {
   try {
     // get user from database.
-    const user = await await User.find({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email });
     if (!user) {
       res.status(404).json({ message: 'User not found' });
     }
@@ -21,13 +21,15 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   try {
     const user = {
-      created: Date.now(),
       username: req.body.username,
-      email: req.body.email
+      email: req.body.email,
+      password: req.body.password
     }
     // store user in database.
     const newUser = new User(user);
-    const registeredUser = await newUser.save();
+    const registeredUser = await newUser.save({
+      timestamps: { createdAt: true, updatedAt: false }
+    });
     res.status(201).json({
       status: 'Registration successful.',
       data: { registeredUser }
