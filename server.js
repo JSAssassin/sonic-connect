@@ -8,7 +8,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 // eslint-disable-next-line no-unused-vars
 mongoose.connect(process.env.LOCAL_CONN_STR).then(conn => {
-  // console.log(conn);
   console.log('DB connection successful.');
 }).catch((error)=> {
   console.log('Some error has occured.', error);
