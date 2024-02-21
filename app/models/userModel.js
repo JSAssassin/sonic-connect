@@ -23,7 +23,7 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: [true, 'Password is required.'],
-    minlength: [10, 'Password must have at least 10 charachters'],
+    minlength: [10, 'Password must have at least 10 characters'],
     trim: true
   },
   role: {
@@ -35,26 +35,26 @@ const userSchema = new Schema({
   timestamps: true
 });
 
-async function hashPassword(req, _res, next) {
+async function hashPassword(next) {
   const user = this;
-  if (!user.isModified('password')) return next();
   try {
-    user.password = await bcrypt.hash(req.body.password, 10);
-    return next();
-  } catch (error) {
-    return next(error);
+    user.password = await bcrypt.hash(user.password, 10);
+    next();
+  } catch (e) {
+    next(e);
   }
+}
+
+async function comparePassword(password) {
+  const user = this;
+  return bcrypt.compare(password, user.password);
 }
 
 // Hash the password before saving it to the database
 userSchema.pre('save', hashPassword);
 
 // Compare the given password with the hashed password in the database
-userSchema.method({
-  comparePassword(password) {
-    return bcrypt.compare(password, this.password);
-  }
-})
+userSchema.methods.comparePassword = comparePassword;
 
 const User = mongoose.model('User', userSchema);
 
