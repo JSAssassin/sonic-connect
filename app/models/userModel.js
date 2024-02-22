@@ -15,7 +15,6 @@ const userSchema = new Schema({
   },
   username: {
     type: String,
-    required: [true, 'Username is required.'],
     unique: true,
     trim: true
   },
@@ -24,7 +23,8 @@ const userSchema = new Schema({
     type: String,
     required: [true, 'Password is required.'],
     minlength: [10, 'Password must have at least 10 characters'],
-    trim: true
+    trim: true,
+    select: false
   },
   role: {
     type: String,
@@ -37,11 +37,14 @@ const userSchema = new Schema({
 
 async function hashPassword(next) {
   const user = this;
+  if (!user.isModified('password')) {
+    return next();
+  }
   try {
     user.password = await bcrypt.hash(user.password, 10);
-    next();
+    return next();
   } catch (e) {
-    next(e);
+    return next(e);
   }
 }
 
