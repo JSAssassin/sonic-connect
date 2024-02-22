@@ -1,6 +1,6 @@
 import express from 'express';
 import pingRoute from './pingRoute.js';
-import userRoutes from './userRoutes.js';
+import userRoutes from './authRoutes.js';
 
 const router = express.Router();
 
