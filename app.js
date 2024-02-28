@@ -1,8 +1,6 @@
-import dotenv from 'dotenv';
 import express from 'express';
 import {pingRouter, authRouter} from './lib/routes/index.js';
 
-dotenv.config();
 const app = express();
 
 // Middleware
