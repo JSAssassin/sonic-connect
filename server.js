@@ -7,12 +7,23 @@ dotenv.config({path: '.env'});
 // eslint-disable-next-line no-unused-vars
 mongoose.connect(process.env.DB_CONN_STR).then(conn => {
   console.log('DB connection successful.');
-}).catch((error)=> {
-  console.log('Some error has occured.', error);
 });
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server has started on port ${port}`);
 });
+
+process.on('unhandledRejection', (err) => {
+  console.log({
+    error: {
+      name: err.name,
+      message: err.message
+    }
+  });
+  console.log('Unhandled rejection occured. Shutting down server...');
+  server.close(() => {
+    process.exit(1);
+  })
+})
