@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import app from './app.js';
 
-dotenv.config({path: '.env'});
+dotenv.config({ path: '.env' });
 
 // eslint-disable-next-line no-unused-vars
 mongoose.connect(process.env.DB_CONN_STR).then(conn => {

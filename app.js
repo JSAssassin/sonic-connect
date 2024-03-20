@@ -1,5 +1,5 @@
 import express from 'express';
-import {authRouter, pingRouter} from './lib/routes/index.js';
+import { authRouter, pingRouter } from './lib/routes/index.js';
 import CustomError from './lib/utils/custom-error.js';
 import globalErrorHandler from './lib/controllers/error-controller.js';
 
