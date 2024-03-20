@@ -8,8 +8,8 @@ const app = express();
 // Middleware
 app.use(express.json());
 // Routes
-app.use('/', pingRouter);
-app.use('/auth', authRouter);
+app.use('/api/v1/', pingRouter);
+app.use('/api/v1/users', authRouter);
 app.all('*', (req, res, next) => {
   const e =
     new CustomError(`Cannot find ${req.originalUrl} on the server.`, 404);
