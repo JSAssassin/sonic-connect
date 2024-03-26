@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import { authRouter, pingRouter, userRouter } from './lib/routes/index.js';
 import CustomError from './lib/utils/custom-error.js';
 import globalErrorHandler from './lib/controllers/error-controller.js';
@@ -6,7 +7,9 @@ import globalErrorHandler from './lib/controllers/error-controller.js';
 const app = express();
 
 // Middleware
+app.use(helmet());
 app.use(express.json());
+
 // Routes
 app.use('/api/v1/', pingRouter);
 app.use('/api/v1/auth', authRouter);
