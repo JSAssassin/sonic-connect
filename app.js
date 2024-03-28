@@ -1,6 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
-import { authRouter, pingRouter, songRouter, userRouter }
+import { artistRouter, authRouter, pingRouter, songRouter, userRouter }
   from './lib/routes/index.js';
 import CustomError from './lib/utils/custom-error.js';
 import globalErrorHandler from './lib/controllers/error-controller.js';
@@ -14,6 +14,7 @@ app.use(express.json());
 // Routes
 app.use('/api/v1/', pingRouter);
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/artists', artistRouter);
 app.use('/api/v1/songs', songRouter);
 app.use('/api/v1/users', userRouter);
 
