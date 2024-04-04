@@ -1,7 +1,8 @@
 import express from 'express';
 import helmet from 'helmet';
 import {
-  albumRouter, artistRouter, authRouter, pingRouter, songRouter, userRouter
+  albumRouter, artistRouter, authRouter, pingRouter, playlistRouter,
+  songRouter, userRouter
 } from './lib/routes/index.js';
 import CustomError from './lib/utils/custom-error.js';
 import globalErrorHandler from './lib/controllers/error-controller.js';
@@ -17,6 +18,7 @@ app.use('/api/v1/', pingRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/albums', albumRouter);
 app.use('/api/v1/artists', artistRouter);
+app.use('/api/v1/playlists', playlistRouter);
 app.use('/api/v1/songs', songRouter);
 app.use('/api/v1/users', userRouter);
 
