@@ -1,5 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
+import fileUpload from 'express-fileupload';
 import {
   albumRouter, artistRouter, authRouter, pingRouter, playlistRouter,
   songRouter, userRouter
@@ -13,6 +14,10 @@ const app = express();
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(fileUpload({
+  parseNested: true,
+  useTempFiles: true
+}));
 
 // Routes
 app.use('/api/v1/', pingRouter);
