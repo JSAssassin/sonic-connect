@@ -2,7 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import fileUpload from 'express-fileupload';
 import {
-  albumRouter, artistRouter, authRouter, pingRouter, playlistRouter,
+  albumRouter, artistRouter, authRouter, fileRouter, pingRouter, playlistRouter,
   songRouter, userRouter
 } from './lib/routes/index.js';
 import CustomError from './lib/utils/custom-error.js';
@@ -24,6 +24,7 @@ app.use('/api/v1/', pingRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/albums', albumRouter);
 app.use('/api/v1/artists', artistRouter);
+app.use('/api/v1/files', fileRouter);
 app.use('/api/v1/playlists', playlistRouter);
 app.use('/api/v1/songs', songRouter);
 app.use('/api/v1/users', userRouter);
