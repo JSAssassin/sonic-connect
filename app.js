@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import fileUpload from 'express-fileupload';
@@ -10,6 +11,8 @@ import globalErrorHandler from './lib/controllers/error-controller.js';
 
 const app = express();
 
+app.use(express.static('./public'));
+
 // Middleware
 app.use(helmet());
 app.use(express.json());
@@ -18,6 +21,7 @@ app.use(fileUpload({
   parseNested: true,
   useTempFiles: true
 }));
+app.use(cookieParser());
 
 // Routes
 app.use('/api/v1/', pingRouter);
