@@ -1,0 +1,27 @@
+[
+  {
+    "name": "admin",
+    "email": "admin@email.com",
+    "password": "admin1234567",
+    "confirmPassword": "admin1234567",
+    "role": "admin"
+  },
+  {
+    "name": "tashi",
+    "email": "tashi@email.com",
+    "password": "tashi1234567",
+    "confirmPassword": "tashi1234567"
+  },
+  {
+    "name": "nish",
+    "email": "nish@email.com",
+    "password": "nish1234567",
+    "confirmPassword": "nish1234567"
+  },
+  {
+    "name": "ori",
+    "email": "ori@email.com",
+    "password": "ori1234567",
+    "confirmPassword": "ori1234567"
+  }
+]
