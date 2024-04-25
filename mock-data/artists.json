@@ -1,0 +1,75 @@
+[
+  {
+    "name": "Alan Walker",
+    "biography": "Alan Olav Walker is a Norwegian DJ and music producer. At the age of 16, Walker released `Fade` on NoCopyrightSounds, which led to a contract with MER Musikk. He rose to fame with his 2015 single `Faded`.",
+    "origin": "Northampton, United Kingdom",
+    "yearFormed": 2012,
+    "genre": [
+      "electro house",
+      "electro pop",
+      "trap",
+      "melodic dubstep"
+    ],
+    "photo": "mock-data/files/artists/alan-walker.jpeg"
+  },
+  {
+    "name": "Rival",
+    "biography": "Valentin Rieff, better known as Rival is a 22 year old German producer and musician. He takes melodic trap one step further by finding creative uses for plugins to curate a unique sound and identity/voice as an artist. With the added mastery of jazz chords and a multitude of instruments including piano, drums, and trumpet, Rival is well equipped to create a unique composition with a variety of influences.",
+    "origin": "Germany",
+    "yearFormed": 2018,
+    "genre": [
+      "trap",
+      "electronic",
+      "bass"
+    ],
+    "photo": "mock-data/files/artists/rival.jpeg"
+  },
+  {
+    "name": "Harley Bird",
+    "biography": "An electronic dance music artist from Los Angeles.",
+    "origin": "LA, USA",
+    "yearFormed": 2017,
+    "genre": [
+      "house",
+      "trap",
+      "EDM"
+    ],
+    "photo": "mock-data/files/artists/harley-bird.jpeg"
+  },
+  {
+    "name": "Ripple",
+    "biography": "Ripple is a Czech-Slovak drum and bass duo created by Spill and PMDR in 2017. Jiri and Peter have both made significant waves in the Czech and Slovak drum and bass scenes. Ripple has performed in Budapest, Hungary, Brno, Czech Republic, and Prague, Czech Republic.",
+    "origin": "Czechoslovakia",
+    "yearFormed": 2017,
+    "genre": [
+      "drum",
+      "bass"
+    ],
+    "photo": "mock-data/files/artists/ripple.jpeg"
+  },
+  {
+    "name": "Culture Code",
+    "biography": "Culture Code is a dance music duo made up of childhood friends Dylan Norton & Chris Bains. Based in the UK, the producer/DJ duo are known for crafting melodically-driven bass music across a variety of genres, including future house & melodic dubstep.",
+    "origin": "United Kingdom",
+    "yearFormed": 2012,
+    "genre": [
+      "future house",
+      "melodic dubstep",
+      "dance"
+    ],
+    "photo": "mock-data/files/artists/culture-code.jpeg"
+  },
+  {
+    "name": "Daniel Levi",
+    "biography": "Daniel Levi is an Estonian artist, whose music includes sonic layers of soul, funk and R'n'B and is armed with a truly lively spirit. A household name in Estonia, Daniel appears regularly on national TV and radio while also gaining more and more attention internationally.",
+    "origin": "Estonia",
+    "yearFormed": 2022,
+    "genre": [
+      "soul",
+      "r&b",
+      "dance",
+      "pop"
+    ],
+    "photo": "mock-data/files/artists/daniel-levi.jpeg"
+  }
+]
