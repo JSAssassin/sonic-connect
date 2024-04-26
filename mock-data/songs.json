@@ -1,0 +1,134 @@
+[
+  {
+    "title": "Dreamer",
+    "duration": 138000,
+    "genre": [
+      "house"
+    ],
+    "artists": [
+      "Alan Walker"
+    ],
+    "releaseDate": "2023-04-07",
+    "photo": "mock-data/files/songs/dreamer/dreamer.jpeg",
+    "audioFile": "mock-data/files/songs/dreamer/dreamer.jpeg"
+  },
+  {
+    "title": "Dreamer (Rival Remix)",
+    "duration": 126000,
+    "genre": [
+      "instrumental",
+      "electronic"
+    ],
+    "artists": [
+      "Alan Walker",
+      "Rival"
+    ],
+    "releaseDate": "2023-05-07",
+    "audioFile": "mock-data/files/songs/dreamer-rival-remix/dreamer-rival-remix.mp3"
+  },
+  {
+    "title": "Seasons",
+    "duration": 288000,
+    "genre": [
+      "electronic",
+      "bass"
+    ],
+    "artists": [
+      "Rival"
+    ],
+    "featuredArtists": [
+      "Harley Bird"
+    ],
+    "releaseDate": "2018-04-04",
+    "photo": "mock-data/files/songs/seasons/seasons.jpeg",
+    "audioFile": "mock-data/files/songs/seasons/seasons.mp3"
+  },
+  {
+    "title": "Everyday",
+    "duration": 144000,
+    "genre": [
+      "drum",
+      "bass"
+    ],
+    "artists": [
+      "Ripple"
+    ],
+    "album": "Ripple Remixes",
+    "releaseDate": "2024-04-18",
+    "audioFile": "mock-data/files/songs/everyday/everyday.mp3"
+  },
+  {
+    "title": "On Your Mind",
+    "duration": 180000,
+    "genre": [
+      "drum",
+      "bass"
+    ],
+    "artists": [
+      "Ripple"
+    ],
+    "album": "Ripple Remixes",
+    "releaseDate": "2024-03-14",
+    "photo": "mock-data/files/songs/on-your-mind/on-your-mind.jpeg",
+    "audioFile": "mock-data/files/songs/seasons/seasons.mp3"
+  },
+  {
+    "title": "Feel Again",
+    "duration": 210000,
+    "genre": [
+      "house"
+    ],
+    "artists": [
+      "Culture Code"
+    ],
+    "featuredArtists": [
+      "Harley Bird"
+    ],
+    "releaseDate": "2018-02-24",
+    "photo": "mock-data/files/songs/feel-again/feel-again.jpeg",
+    "audioFile": "mock-data/files/songs/feel-again/feel-again.mp3"
+  },
+  {
+    "title": "Not Giving In",
+    "duration": 180000,
+    "genre": [
+      "melodic dubstep"
+    ],
+    "artists": [
+      "Culture Code"
+    ],
+    "releaseDate": "2022-11-11",
+    "photo": "mock-data/files/songs/not-giving-in/not-giving-in.jpeg",
+    "audioFile": "mock-data/files/songs/not-giving-in/not-giving-in.mp3"
+  },
+  {
+    "title": "Honey",
+    "duration": 192000,
+    "genre": [
+      "dance",
+      "indie"
+    ],
+    "artists": [
+      "Daniel Levi"
+    ],
+    "album": "14/02",
+    "releaseDate": "2023-09-22",
+    "photo": "mock-data/files/songs/honey/honey.jpeg",
+    "audioFile": "mock-data/files/songs/honey/honey.mp3"
+  },
+  {
+    "title": "I Like It With You",
+    "duration": 150000,
+    "genre": [
+      "dance",
+      "pop"
+    ],
+    "artists": [
+      "Daniel Levi"
+    ],
+    "album": "14/02",
+    "releaseDate": "2023-10-13",
+    "photo": "mock-data/files/songs/i-like-it-with-you/i-like-it-with-you.jpeg",
+    "audioFile": "mock-data/files/songs/i-like-it-with-you/i-like-it-with-you.mp3"
+  }
+]

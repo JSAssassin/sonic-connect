@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Ripple Remixes",
+    "description": "The album is a collection of Ripple's best remixes.",
+    "releaseDate": "2024-04-19",
+    "artists": [
+      "Ripple"
+    ],
+    "genre": [
+      "drum",
+      "bass"
+    ],
+    "photo": "mock-data/files/albums/ripple-remixes/ripple-remixes.jpeg"
+  },
+  {
+    "title": "14/02",
+    "description": "The album is dedicated to his wife and pays homage to the way that Daniel confessed his love to her.",
+    "releaseDate": "2023-10-13",
+    "artists": [
+      "Daniel Levi"
+    ],
+    "genre": [
+      "pop"
+    ],
+    "photo": "mock-data/files/albums/14:02/14:02.jpeg"
+  }
+]
