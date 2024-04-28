@@ -38,7 +38,8 @@ const loginMockAdmin = async () => {
   if (res.status !== 200) {
     throw new Error('Failed to log in mock admin');
   }
-  return res.headers.get('set-cookie').split(';')[0].split('=')[1];
+  const { jwt } = await res.json();
+  return jwt;
 };
 
 const uploadFormData = async ({ filePath, type, jwt } = {}) => {
@@ -49,7 +50,7 @@ const uploadFormData = async ({ filePath, type, jwt } = {}) => {
     method: 'POST',
     body: form,
     headers: {
-      'Cookie': `jwt=${jwt}`,
+      'Authorization': `Bearer ${jwt}`
     }
   });
   return res.json();
@@ -68,7 +69,7 @@ const createMockArtists = async ({ jwt } = {}) => {
       body: JSON.stringify(artist),
       headers: {
         ...headers,
-        'Cookie': `jwt=${jwt}`,
+        'Authorization': `Bearer ${jwt}`
       }
     });
   });
@@ -87,7 +88,7 @@ const getArtistID = async ({ queryParams, jwt } = {}) => {
     method: 'GET',
     headers: {
       ...headers,
-      'Cookie': `jwt=${jwt}`,
+      'Authorization': `Bearer ${jwt}`
     }
   });
   const { data: { artists: [{ _id: artistId }] } } = await res.json();
@@ -101,7 +102,7 @@ const getAlbumID = async ({ queryParams, jwt } = {}) => {
     method: 'GET',
     headers: {
       ...headers,
-      'Cookie': `jwt=${jwt}`,
+      'Authorization': `Bearer ${jwt}`
     }
   });
   const { data: { albums: [{ _id: albumId }] } } = await res.json();
@@ -127,7 +128,7 @@ const createMockAlbums = async ({ jwt } = {}) => {
       body: JSON.stringify(album),
       headers: {
         ...headers,
-        'Cookie': `jwt=${jwt}`,
+        'Authorization': `Bearer ${jwt}`
       }
     });
   });
@@ -143,7 +144,7 @@ const createMockSongs = async ({ jwt } = {}) => {
   const data = JSON.parse(fs.readFileSync("./mock-data/songs.json"));
   const promises = data.map(async songData => {
     const song = { ...songData };
-    if(song.photo) {
+    if (song.photo) {
       const { data: { file: { id: photo } } } = await uploadFormData({
         filePath: songData.photo, type: 'image/jpeg', jwt
       });
@@ -159,7 +160,7 @@ const createMockSongs = async ({ jwt } = {}) => {
     });
     const artists = await Promise.all(artistPromises);
     song.artists = artists;
-    if(song.featuredArtists) {
+    if (song.featuredArtists) {
       const featuredArtistPromises = song.featuredArtists.map(async artist => {
         const queryParams = { name: artist };
         return getArtistID({ queryParams, jwt });
@@ -167,7 +168,7 @@ const createMockSongs = async ({ jwt } = {}) => {
       const featuredArtists = await Promise.all(featuredArtistPromises);
       song.featuredArtists = featuredArtists;
     }
-    if(song.album) {
+    if (song.album) {
       const queryParams = { title: song.album };
       const albumId = await getAlbumID({ queryParams, jwt });
       song.album = albumId;
@@ -177,7 +178,7 @@ const createMockSongs = async ({ jwt } = {}) => {
       body: JSON.stringify(song),
       headers: {
         ...headers,
-        'Cookie': `jwt=${jwt}`,
+        'Authorization': `Bearer ${jwt}`
       }
     });
   });

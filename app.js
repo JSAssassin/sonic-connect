@@ -1,4 +1,3 @@
-import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import fileUpload from 'express-fileupload';
@@ -21,7 +20,6 @@ app.use(fileUpload({
   parseNested: true,
   useTempFiles: true
 }));
-app.use(cookieParser());
 
 // Routes
 app.use('/api/v1/', pingRouter);
