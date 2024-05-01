@@ -4,8 +4,14 @@ import app from './app.js';
 
 dotenv.config({ path: '.env' });
 
-// eslint-disable-next-line no-unused-vars
-mongoose.connect(process.env.DB_CONN_STR).then(conn => {
+const DB_NAME = process.env.NODE_ENV === 'test' ?
+  `${process.env.DB_NAME}-test` : process.env.DB_NAME;
+
+mongoose.connect(`${process.env.DB_CONN_STR}`, {
+  user: process.env.DB_USER,
+  pass: process.env.DB_PASSWORD,
+  dbName: DB_NAME
+}).then(() => {
   console.log('DB connection successful.');
 });
 
