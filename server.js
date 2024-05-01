@@ -1,19 +1,8 @@
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import app from './app.js';
+import './initialize-db.js';
 
 dotenv.config({ path: '.env' });
-
-const DB_NAME = process.env.NODE_ENV === 'test' ?
-  `${process.env.DB_NAME}-test` : process.env.DB_NAME;
-
-mongoose.connect(`${process.env.DB_CONN_STR}`, {
-  user: process.env.DB_USER,
-  pass: process.env.DB_PASSWORD,
-  dbName: DB_NAME
-}).then(() => {
-  console.log('DB connection successful.');
-});
 
 const port = process.env.PORT || 3000;
 
