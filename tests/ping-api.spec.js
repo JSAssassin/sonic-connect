@@ -1,11 +1,10 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, test } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
+import apiVersion from './test-config.js';
 
-const apiVersion = '/api/v1';
-
-describe('GET /ping', () => {
-  it('should return a successful response.', async () => {
+describe('API /ping', () => {
+  test('GET /ping - should return a successful response.', async () => {
     const response = await request(app).get(`${apiVersion}/ping`);
     const { status, body } = response;
     expect(status).toBe(200);

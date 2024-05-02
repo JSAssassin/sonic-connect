@@ -1,15 +1,14 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, test } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
 import setupDB from './test-db-setup.js';
+import apiVersion from './test-config.js';
 
 // Setup a Test Database
 await setupDB();
 
-const apiVersion = '/api/v1';
-
-describe('GET /auth', () => {
-  it('should register a new user.', async () => {
+describe('API /auth', () => {
+  test('POST /auth/signup - should register a new user.', async () => {
     const newUser = {
       "name": "bob",
       "email": "bob@email.com",
