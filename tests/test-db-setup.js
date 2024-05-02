@@ -8,12 +8,7 @@ async function removeAllCollections() {
     const collection = collections[collectionName];
     await collection.deleteMany();
   });
-  try {
-    await Promise.all(promises);
-    console.log('All collections removed successfully.');
-  } catch (error) {
-    console.error('Error removing collections:', error);
-  }
+  await Promise.all(promises);
 }
 
 async function setupDB() {

@@ -12,8 +12,4 @@ const conn = await mongoose.connect(`${process.env.DB_CONN_STR}`, {
   dbName: DB_NAME
 });
 
-if(conn) {
-  console.log('DB connection successful.');
-}
-
 export default conn;
