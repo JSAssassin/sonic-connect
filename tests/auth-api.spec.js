@@ -91,14 +91,12 @@ describe('API /auth', () => {
   })
   describe('POST /auth/forgotPassword & PATCH /auth/resetPassword/:token', () => {
     const newUser = { ...users.find(user => user.email === 'bob@email.com') };
+    let passwordResetToken;
     beforeEach(async () => {
       // register a new user
       const response = await registerUser({ newUser });
       const { status } = response;
       expect(status).toBe(201);
-    });
-    test('should successfully reset a user password.', async () => {
-      let passwordResetToken;
       // mock the sendMail method of nodemailer's transporter to handle email
       // sending
       nodemailer.createTransport = jest.fn(() => ({
@@ -109,9 +107,11 @@ describe('API /auth', () => {
           return { messageId: 'test' };
         })
       }));
+    });
+    test('should successfully reset a user password.', async () => {
       // user requests to reset their password
       const passwordResetRequestResponse =
-        await sendPasswordResetRequest({ email: newUser.email })
+        await sendPasswordResetRequest({ email: newUser.email });
       const {
         status: passwordResetRequestStatus, body: { message }
       } = passwordResetRequestResponse;
@@ -123,7 +123,7 @@ describe('API /auth', () => {
       const newPassword = 'new-password';
       const resetPasswordResponse = await resetPassword({
         passwordResetToken, newPassword, confirmPassword: newPassword
-      })
+      });
       const {
         status: resetPasswordStatus, body: { data: { user } }
       } = resetPasswordResponse;
@@ -155,6 +155,92 @@ describe('API /auth', () => {
       expect(jwt).toBeDefined();
       expect(loggedInUser).toHaveProperty('name', newUser.name);
     });
+    test('should throw if email is not provided when user requests to ' +
+      'reset password.', async () => {
+        // user requests to reset their password
+        const response = await sendPasswordResetRequest();
+        const { status, body: { message } } = response;
+        console.log(status, 'status');
+        console.log(message);
+        expect(status).toBe(400);
+        expect(message).toContain('Email is required');
+      });
+    test('should throw if email provided  does not exist when user requests ' +
+      'to reset password.', async () => {
+        // user requests to reset their password
+        const response = await sendPasswordResetRequest({
+          email: 'non-existent@email.,com'
+        });
+        const { status, body: { message } } = response;
+        console.log(status, 'status');
+        console.log(message);
+        expect(status).toBe(404);
+        expect(message).toContain('Could not find a user for the given email');
+      });
+    test('should throw if password reset token is invalid when user attempts ' +
+      'to reset password.', async () => {
+        passwordResetToken = 'invalid-token';
+        const newPassword = 'new-password';
+        const response = await resetPassword({
+          passwordResetToken, newPassword, confirmPassword: newPassword
+        });
+        const { status, body: { message } } = response;
+        console.log(status, 'status');
+        console.log(message);
+        expect(status).toBe(400);
+        expect(message).toContain(
+          'Password reset token either expired or is invalid.');
+      });
+    test('should throw if new password or confirm password is not provided ' +
+      'when user attempts to reset password.', async () => {
+        // user requests to reset their password
+        const passwordResetRequestResponse =
+          await sendPasswordResetRequest({ email: newUser.email });
+        const {
+          status: passwordResetRequestStatus,
+          body: { message: passwordResetMessage }
+        } = passwordResetRequestResponse;
+        expect(passwordResetRequestStatus).toBe(200);
+        expect(passwordResetMessage).toContain('Password reset link sent');
+        const resetPasswordResponse = await resetPassword({
+          passwordResetToken
+        });
+        const {
+          status: resetPasswordStatus,
+          body: { message: resetPasswordMessage }
+        } = resetPasswordResponse;
+        console.log(resetPasswordStatus, 'status');
+        console.log(resetPasswordMessage);
+        expect(resetPasswordStatus).toBe(400);
+        expect(resetPasswordMessage).toContain(
+          'Please enter new password and confirm password.');
+      });
+    test('should throw if new password is the same as the old password ' +
+      'when user attempts to reset password.', async () => {
+        // user requests to reset their password
+        const passwordResetRequestResponse =
+          await sendPasswordResetRequest({ email: newUser.email });
+        const {
+          status: passwordResetRequestStatus,
+          body: { message: passwordResetMessage }
+        } = passwordResetRequestResponse;
+        expect(passwordResetRequestStatus).toBe(200);
+        expect(passwordResetMessage).toContain('Password reset link sent');
+        const oldPassword = newUser.password;
+        console.log(passwordResetToken, 'passwordResetToken');
+        const resetPasswordResponse = await resetPassword({
+          passwordResetToken,
+          newPassword: oldPassword,
+          confirmPassword: oldPassword
+        });
+        const {
+          status: resetPasswordStatus,
+          body: { message: resetPasswordMessage }
+        } = resetPasswordResponse;
+        expect(resetPasswordStatus).toBe(400);
+        expect(resetPasswordMessage).toContain(
+          'New password must not be the same as the old password.');
+      });
   })
   describe('POST /auth/logout', () => {
     test('should invalidate JWT token when user logs out.', async () => {
