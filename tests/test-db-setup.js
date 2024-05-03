@@ -1,4 +1,4 @@
-import { afterAll, afterEach } from '@jest/globals';
+import { afterAll, beforeEach } from '@jest/globals';
 import mongooseInstance from '../initialize-db.js';
 
 async function removeAllCollections() {
@@ -6,14 +6,14 @@ async function removeAllCollections() {
   const collectionNames = Object.keys(collections);
   const promises = collectionNames.map(async collectionName => {
     const collection = collections[collectionName];
-    await collection.deleteMany();
+    return collection.deleteMany();
   });
   await Promise.all(promises);
 }
 
-async function setupDB() {
+function setupDB() {
   // Cleans up database between each test
-  afterEach(async () => {
+  beforeEach(async () => {
     await removeAllCollections();
   });
 
