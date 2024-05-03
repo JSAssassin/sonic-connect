@@ -7,16 +7,16 @@
     "role": "admin"
   },
   {
-    "name": "tashi",
-    "email": "tashi@email.com",
-    "password": "tashi1234567",
-    "confirmPassword": "tashi1234567"
+    "name": "bob",
+    "email": "bob@email.com",
+    "password": "bob1234567",
+    "confirmPassword": "bob1234567"
   },
   {
-    "name": "nish",
-    "email": "nish@email.com",
-    "password": "nish1234567",
-    "confirmPassword": "nish1234567"
+    "name": "alice",
+    "email": "alice@email.com",
+    "password": "alice1234567",
+    "confirmPassword": "alice1234567"
   },
   {
     "name": "ori",
