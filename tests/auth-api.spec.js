@@ -160,8 +160,6 @@ describe('API /auth', () => {
         // user requests to reset their password
         const response = await sendPasswordResetRequest();
         const { status, body: { message } } = response;
-        console.log(status, 'status');
-        console.log(message);
         expect(status).toBe(400);
         expect(message).toContain('Email is required');
       });
@@ -172,8 +170,6 @@ describe('API /auth', () => {
           email: 'non-existent@email.,com'
         });
         const { status, body: { message } } = response;
-        console.log(status, 'status');
-        console.log(message);
         expect(status).toBe(404);
         expect(message).toContain('Could not find a user for the given email');
       });
@@ -185,8 +181,6 @@ describe('API /auth', () => {
           passwordResetToken, newPassword, confirmPassword: newPassword
         });
         const { status, body: { message } } = response;
-        console.log(status, 'status');
-        console.log(message);
         expect(status).toBe(400);
         expect(message).toContain(
           'Password reset token either expired or is invalid.');
@@ -209,8 +203,6 @@ describe('API /auth', () => {
           status: resetPasswordStatus,
           body: { message: resetPasswordMessage }
         } = resetPasswordResponse;
-        console.log(resetPasswordStatus, 'status');
-        console.log(resetPasswordMessage);
         expect(resetPasswordStatus).toBe(400);
         expect(resetPasswordMessage).toContain(
           'Please enter new password and confirm password.');
@@ -227,7 +219,6 @@ describe('API /auth', () => {
         expect(passwordResetRequestStatus).toBe(200);
         expect(passwordResetMessage).toContain('Password reset link sent');
         const oldPassword = newUser.password;
-        console.log(passwordResetToken, 'passwordResetToken');
         const resetPasswordResponse = await resetPassword({
           passwordResetToken,
           newPassword: oldPassword,
