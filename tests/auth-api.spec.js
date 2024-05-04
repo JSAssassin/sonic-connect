@@ -1,9 +1,9 @@
 import {
-  beforeEach, describe, expect, jest, test
+  afterAll, beforeEach, describe, expect, jest, test
 } from '@jest/globals';
 import nodemailer from 'nodemailer';
 import fs from 'node:fs';
-import {removeAllCollections } from './test-db-setup.js';
+import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
   getUserProfile, loginUser, logoutUser, sendPasswordResetRequest, registerUser,
   resetPassword
@@ -12,6 +12,10 @@ import {
 const users = JSON.parse(fs.readFileSync("./mock-data/users.json"));
 
 describe('API /auth', () => {
+  afterAll(async () => {
+    await removeAllCollections();
+    await closeConnection();
+  });
   describe('POST /auth/signup', () => {
     beforeEach(async () => {
       await removeAllCollections();
