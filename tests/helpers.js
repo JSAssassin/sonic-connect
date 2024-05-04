@@ -50,6 +50,13 @@ const resetPassword = async ({
   return response;
 }
 
+const getUsers = async ({ token } = {}) => {
+  const response = await request(app)
+    .get(`${apiVersion}/users`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 const getUserProfile = async ({ token } = {}) => {
   const response = await request(app)
     .get(`${apiVersion}/users/profile`)
@@ -57,13 +64,24 @@ const getUserProfile = async ({ token } = {}) => {
   return response;
 }
 
+const registerUsers = async ({ users }) => {
+  const promises = users.map(async newUser => {
+    const res = await registerUser({ newUser });
+    const { body: { data: { user } } } = res;
+    return user;
+  });
+  return Promise.all(promises);
+}
+
 export {
   apiVersion,
   getUserProfile,
+  getUsers,
   loginUser,
   logoutUser,
   ping,
   registerUser,
+  registerUsers,
   resetPassword,
   sendPasswordResetRequest
 };
