@@ -7,7 +7,7 @@
   "scripts": {
     "prod": "NODE_ENV=production node ./server.js",
     "dev": "NODE_ENV=development nodemon ./server.js",
-    "test": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest tests --verbose",
+    "test": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest tests --verbose --runInBand",
     "coverage": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
     "lint": "eslint .",
     "prettier": "prettier . --write"
