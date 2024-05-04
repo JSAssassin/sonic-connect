@@ -7,7 +7,7 @@
   "scripts": {
     "prod": "NODE_ENV=production node ./server.js",
     "dev": "NODE_ENV=development nodemon ./server.js",
-    "test": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest tests --verbose --runInBand",
+    "test": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest tests --runInBand --config tests/jest.config.cjs",
     "coverage": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
     "lint": "eslint .",
     "prettier": "prettier . --write"
@@ -42,11 +42,5 @@
   },
   "engines": {
     "node": ">=20"
-  },
-  "jest": {
-    "coveragePathIgnorePatterns": [
-      "node_modules",
-      "tests"
-    ]
   }
 }
