@@ -1,7 +1,9 @@
-import { beforeEach, describe, expect, jest, test } from '@jest/globals';
+import {
+  beforeEach, describe, expect, jest, test
+} from '@jest/globals';
 import nodemailer from 'nodemailer';
 import fs from 'node:fs';
-import setupDB from './test-db-setup.js';
+import {removeAllCollections } from './test-db-setup.js';
 import {
   getUserProfile, loginUser, logoutUser, sendPasswordResetRequest, registerUser,
   resetPassword
@@ -10,8 +12,10 @@ import {
 const users = JSON.parse(fs.readFileSync("./mock-data/users.json"));
 
 describe('API /auth', () => {
-  setupDB();
   describe('POST /auth/signup', () => {
+    beforeEach(async () => {
+      await removeAllCollections();
+    });
     test('should register a new user.', async () => {
       const newUser = { ...users.find(user => user.email === 'bob@email.com') };
       const response = await registerUser({ newUser });
@@ -45,6 +49,7 @@ describe('API /auth', () => {
   describe('POST /auth/login', () => {
     const newUser = { ...users.find(user => user.email === 'bob@email.com') };
     beforeEach(async () => {
+      await removeAllCollections();
       // register a new user before each test.
       const response = await registerUser({ newUser });
       const { status } = response;
@@ -92,21 +97,22 @@ describe('API /auth', () => {
   describe('POST /auth/forgotPassword & PATCH /auth/resetPassword/:token', () => {
     const newUser = { ...users.find(user => user.email === 'bob@email.com') };
     let passwordResetToken;
+    // mock the sendMail method of nodemailer's transporter to handle email
+    // sending
+    nodemailer.createTransport = jest.fn(() => ({
+      sendMail: jest.fn(async ({ text }) => {
+        // extracting the password reset token from the email content.
+        [, passwordResetToken] =
+          text.match(/resetPassword\/([a-fA-F0-9]+)/);
+        return { messageId: 'test' };
+      })
+    }));
     beforeEach(async () => {
+      await removeAllCollections();
       // register a new user
       const response = await registerUser({ newUser });
       const { status } = response;
       expect(status).toBe(201);
-      // mock the sendMail method of nodemailer's transporter to handle email
-      // sending
-      nodemailer.createTransport = jest.fn(() => ({
-        sendMail: jest.fn(async ({ text }) => {
-          // extracting the password reset token from the email content.
-          [, passwordResetToken] =
-            text.match(/resetPassword\/([a-fA-F0-9]+)/);
-          return { messageId: 'test' };
-        })
-      }));
     });
     test('should successfully reset a user password.', async () => {
       // user requests to reset their password
@@ -234,6 +240,9 @@ describe('API /auth', () => {
       });
   })
   describe('POST /auth/logout', () => {
+    beforeEach(async () => {
+      await removeAllCollections();
+    });
     test('should invalidate JWT token when user logs out.', async () => {
       const newUser = { ...users.find(user => user.email === 'bob@email.com') };
       // register a new user
