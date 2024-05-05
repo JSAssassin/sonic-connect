@@ -24,6 +24,8 @@ jobs:
           - 27017:27017
     env:
       DB_CONN_STR: mongodb://127.0.0.1:27017
+      LOGIN_EXPIRES: 86400000 # 1 day in milliseconds
+      SECRET_STR: ${{ secrets.SECRET_STR }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
