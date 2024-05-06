@@ -71,6 +71,16 @@ const getUserProfile = async ({ token } = {}) => {
   return response;
 }
 
+const updateUserProfile = async ({ token, updatedProfile } = {}) => {
+  const response = await request(app)
+    .patch(`${apiVersion}/users/profile`)
+    .send({
+      ...updatedProfile
+    })
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 const deactivateUser = async ({ token } = {}) => {
   const response = await request(app)
     .delete(`${apiVersion}/users/profile`)
@@ -114,5 +124,6 @@ export {
   registerUsers,
   resetPassword,
   sendPasswordResetRequest,
-  updatePassword
+  updatePassword,
+  updateUserProfile
 };

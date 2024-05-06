@@ -2,7 +2,8 @@ import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
-  deactivateUser, getUser, getUsers, loginUser, registerUsers, updatePassword
+  deactivateUser, getUser, getUsers, loginUser, registerUsers, updatePassword,
+  updateUserProfile
 } from './helpers.js';
 
 const mockUsers = JSON.parse(fs.readFileSync("./mock-data/users.json"));
@@ -242,6 +243,70 @@ describe('API /users', () => {
         expect(status).toBe(400);
         expect(message).toContain(
           'The new password must be different from the current password.');
+      });
+  })
+  describe('PATCH /users/profile', () => {
+    test('user should be able to update their profile.', async () => {
+      const updatedProfile = {
+        dob: {
+          year: 1977,
+          month: 11,
+          day: 10
+        }
+      };
+      const response = await updateUserProfile({
+        updatedProfile,
+        token: aliceJWT
+      });
+      const { status, body: { data: { user } } } = response;
+      expect(status).toBe(200);
+      expect(user).toHaveProperty('name', 'alice');
+      expect(user).toHaveProperty('dob', updatedProfile.dob);
+    });
+    test('should throw if user tries to update password using this endpoint.',
+      async () => {
+        const updatedProfile = {
+          password: 'new-password'
+        };
+        const response = await updateUserProfile({
+          updatedProfile,
+          token: aliceJWT
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          'You cannot update email, password, role or active status ' +
+          'using this endpoint.');
+      });
+    test('should throw if user tries to update active status using this ' +
+      'endpoint.', async () => {
+        const updatedProfile = {
+          active: false
+        };
+        const response = await updateUserProfile({
+          updatedProfile,
+          token: aliceJWT
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          'You cannot update email, password, role or active status ' +
+          'using this endpoint.');
+      });
+    test('should throw if user tries to update email using this endpoint.',
+      async () => {
+        const updatedProfile = {
+          email: `new-email@email.com`
+        };
+        const response = await updateUserProfile({
+          updatedProfile,
+          token: aliceJWT
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          'You cannot update email, password, role or active status ' +
+          'using this endpoint.');
       });
   })
 });
