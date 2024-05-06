@@ -2,7 +2,7 @@ import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
-  deactivateUser, getUser, getUsers, loginUser, registerUsers
+  deactivateUser, getUser, getUsers, loginUser, registerUsers, updatePassword
 } from './helpers.js';
 
 const mockUsers = JSON.parse(fs.readFileSync("./mock-data/users.json"));
@@ -136,13 +136,15 @@ describe('API /users', () => {
         expect(getUserMessage).toContain(
           `User with ID "${aliceId}" not found.`);
 
-        // log back into their account
+        // user logs back into their account, this will reactivate the user
+        // account
         await loginUser({
           email: 'alice@email.com',
           password: 'alice1234567'
         });
 
-        // try to get the account again, this should work
+        // try to get the account again, should be now able to find the account
+        // since it's been activated
         const getUserResponse2 = await getUser({
           userId: aliceId,
           token: adminJWT
@@ -153,6 +155,93 @@ describe('API /users', () => {
         expect(getUserStatus2).toBe(200);
         expect(user).toBeDefined();
         expect(user.name).toBe('alice');
+      });
+  })
+  describe('PATCH /users/password', () => {
+    test('user should be able to update their password.', async () => {
+      const newPassword = 'new-password';
+      // this should update the password and logout the user.
+      const updatePasswordResponse = await updatePassword({
+        token: aliceJWT,
+        newPassword,
+        confirmPassword: newPassword,
+        currentPassword: 'alice1234567'
+      });
+      const {
+        status: updatePasswordStatus, body: { data: { user }, message }
+      } = updatePasswordResponse;
+      expect(updatePasswordStatus).toBe(200);
+      expect(user).toHaveProperty('passwordChangedAt', expect.any(String));
+      expect(user).toHaveProperty('name', 'alice');
+      expect(message).toContain('Your password has been updated successfully.');
+      // user attempts to login using old password, this should fail
+      const loginWithOldPasswordResponse = await loginUser({
+        email: 'alice@email.com',
+        password: 'alice1234567'
+      });
+      const {
+        status: loginWithOldPasswordStatus, body: { message: loginMessage }
+      } = loginWithOldPasswordResponse;
+      expect(loginWithOldPasswordStatus).toBe(401);
+      expect(loginMessage).toContain('Incorrect password');
+      // user attempts to login using new password, this should succeed
+      const loginWithNewPasswordResponse = await loginUser({
+        email: 'alice@email.com',
+        password: newPassword
+      });
+      const {
+        status: loginWithNewPasswordStatus,
+        body: {
+          jwt, data: { user: loggedInUser }
+        }
+      } = loginWithNewPasswordResponse;
+      expect(loginWithNewPasswordStatus).toBe(200);
+      expect(jwt).toBeDefined();
+      expect(loggedInUser).toHaveProperty('name', 'alice');
+    });
+    test('should throw if no new password is provided.', async () => {
+      const response = await updatePassword({
+        token: aliceJWT,
+        currentPassword: 'alice1234567'
+      });
+      const { status } = response;
+      expect(status).toBe(400);
+    });
+    test('should throw if current password is not provided.', async () => {
+      const newPassword = 'new-password';
+      const response = await updatePassword({
+        token: aliceJWT,
+        newPassword,
+        confirmPassword: newPassword,
+      });
+      const { status } = response;
+      expect(status).toBe(400);
+    });
+    test('should throw if current password is incorrect.', async () => {
+      const newPassword = 'new-password';
+      const response = await updatePassword({
+        token: aliceJWT,
+        newPassword,
+        confirmPassword: newPassword,
+        currentPassword: 'incorrect-password'
+      });
+      const { status, body: { message } } = response;
+      expect(status).toBe(401);
+      expect(message).toContain('The current password you provided is wrong.');
+    });
+    test('should throw if new password is the same as the current password.',
+      async () => {
+        const newPassword = 'alice1234567';
+        const response = await updatePassword({
+          token: aliceJWT,
+          newPassword,
+          confirmPassword: newPassword,
+          currentPassword: 'alice1234567'
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          'The new password must be different from the current password.');
       });
   })
 });

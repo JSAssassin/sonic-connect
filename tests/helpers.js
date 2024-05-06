@@ -78,6 +78,20 @@ const deactivateUser = async ({ token } = {}) => {
   return response;
 }
 
+const updatePassword = async ({
+  token, newPassword, confirmPassword, currentPassword
+} = {}) => {
+  const response = await request(app)
+    .patch(`${apiVersion}/users/profile/password`)
+    .send({
+      newPassword,
+      confirmPassword,
+      currentPassword
+    })
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 const registerUsers = async ({ users }) => {
   const promises = users.map(async newUser => {
     const res = await registerUser({ newUser });
@@ -99,5 +113,6 @@ export {
   registerUser,
   registerUsers,
   resetPassword,
-  sendPasswordResetRequest
+  sendPasswordResetRequest,
+  updatePassword
 };
