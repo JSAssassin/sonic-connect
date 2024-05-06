@@ -57,6 +57,13 @@ const getUsers = async ({ token } = {}) => {
   return response;
 }
 
+const getUser = async ({ userId, token } = {}) => {
+  const response = await request(app)
+    .get(`${apiVersion}/users/${userId}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 const getUserProfile = async ({ token } = {}) => {
   const response = await request(app)
     .get(`${apiVersion}/users/profile`)
@@ -75,6 +82,7 @@ const registerUsers = async ({ users }) => {
 
 export {
   apiVersion,
+  getUser,
   getUserProfile,
   getUsers,
   loginUser,

@@ -16,7 +16,12 @@
     "name": "alice",
     "email": "alice@email.com",
     "password": "alice1234567",
-    "confirmPassword": "alice1234567"
+    "confirmPassword": "alice1234567",
+    "dob": {
+      "year": 1977,
+      "month": 10,
+      "day": 11
+    }
   },
   {
     "name": "ori",
