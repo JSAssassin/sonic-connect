@@ -2,7 +2,7 @@ import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
-  getUser, getUsers, loginUser, registerUsers
+  deactivateUser, getUser, getUsers, loginUser, registerUsers
 } from './helpers.js';
 
 const mockUsers = JSON.parse(fs.readFileSync("./mock-data/users.json"));
@@ -11,35 +11,32 @@ describe('API /users', () => {
   let adminJWT;
   let bobJWT;
   let aliceId;
+  let aliceJWT;
   beforeEach(async () => {
     await removeAllCollections();
     // create mock users
     const registeredUsers = await registerUsers({ users: mockUsers });
-    const alice = {
+    aliceId = {
       ...registeredUsers.find(
         user => user.name === 'alice')
-    };
-    aliceId = alice.id;
-    const admin = {
-      ...mockUsers.find(
-        user => user.email === 'admin@email.com')
-    };
-    const bob = {
-      ...mockUsers.find(
-        user => user.email === 'bob@email.com')
-    };
+    }.id;
     const adminLoginResponse = await loginUser({
-      email: admin.email,
-      password: admin.password
+      email: 'admin@email.com',
+      password: 'admin1234567'
     });
     ({ body: { jwt: adminJWT } } = adminLoginResponse);
     expect(adminJWT).toBeDefined();
     const bobLoginResponse = await loginUser({
-      email: bob.email,
-      password: bob.password
+      email: 'bob@email.com',
+      password: 'bob1234567'
     });
     ({ body: { jwt: bobJWT } } = bobLoginResponse);
     expect(bobJWT).toBeDefined();
+    const aliceLoginResponse = await loginUser({
+      email: 'alice@email.com',
+      password: 'alice1234567'
+    });
+    ({ body: { jwt: aliceJWT } } = aliceLoginResponse);
   });
   afterAll(async () => {
     await removeAllCollections();
@@ -89,7 +86,7 @@ describe('API /users', () => {
         expect(user2).toBeDefined();
         expect(user2.name).toBe('alice');
       });
-    test('should throw if user ID is invalid or non existent.', async () => {
+    test('should throw if user ID is invalid.', async () => {
       const invalidUserId = 'invalid-id';
       // attempting to get an invalid user id should fail
       const response = await getUser({
@@ -100,5 +97,62 @@ describe('API /users', () => {
       expect(status).toBe(400);
       expect(message).toContain(`Invalid value ${invalidUserId} for _id`);
     });
+  })
+  describe('DELETE /users/profile', () => {
+    test('user should be able to deactivate their account', async () => {
+      // user deactivates their account, this invalidates the JWT token and sets
+      // the user's active status to false.
+      const deactivateUserResponse = await deactivateUser({ token: aliceJWT });
+      const {
+        status: deactivateUserStatus, body: { message }
+      } = deactivateUserResponse;
+      expect(deactivateUserStatus).toBe(200);
+      expect(message).toContain('account has been deactivated.');
+    });
+    test('user should be able to activate their account by logging in.',
+      async () => {
+        // user deactivates their account, this invalidates the JWT token and
+        // sets the user's active status to false.
+        const deactivateUserResponse = await deactivateUser({
+          token: aliceJWT
+        });
+        const {
+          status: deactivateUserStatus,
+          body: { message: deactivateUserMessage }
+        } = deactivateUserResponse;
+        expect(deactivateUserStatus).toBe(200);
+        expect(deactivateUserMessage).toContain(
+          'account has been deactivated.');
+
+        // try to get the deactivated account, this should fail
+        const getUserResponse = await getUser({
+          userId: aliceId,
+          token: adminJWT
+        });
+        const {
+          status: getUserStatus, body: { message: getUserMessage }
+        } = getUserResponse;
+        expect(getUserStatus).toBe(404);
+        expect(getUserMessage).toContain(
+          `User with ID "${aliceId}" not found.`);
+
+        // log back into their account
+        await loginUser({
+          email: 'alice@email.com',
+          password: 'alice1234567'
+        });
+
+        // try to get the account again, this should work
+        const getUserResponse2 = await getUser({
+          userId: aliceId,
+          token: adminJWT
+        });
+        const {
+          status: getUserStatus2, body: { data: { user } }
+        } = getUserResponse2;
+        expect(getUserStatus2).toBe(200);
+        expect(user).toBeDefined();
+        expect(user.name).toBe('alice');
+      });
   })
 });

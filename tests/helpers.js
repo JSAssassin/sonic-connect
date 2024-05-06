@@ -71,6 +71,13 @@ const getUserProfile = async ({ token } = {}) => {
   return response;
 }
 
+const deactivateUser = async ({ token } = {}) => {
+  const response = await request(app)
+    .delete(`${apiVersion}/users/profile`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 const registerUsers = async ({ users }) => {
   const promises = users.map(async newUser => {
     const res = await registerUser({ newUser });
@@ -82,6 +89,7 @@ const registerUsers = async ({ users }) => {
 
 export {
   apiVersion,
+  deactivateUser,
   getUser,
   getUserProfile,
   getUsers,
