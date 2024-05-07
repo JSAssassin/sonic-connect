@@ -17,10 +17,10 @@ describe('API /users', () => {
     await removeAllCollections();
     // create mock users
     const registeredUsers = await registerUsers({ users: mockUsers });
-    aliceId = {
+    ({ id: aliceId } = {
       ...registeredUsers.find(
         user => user.name === 'alice')
-    }.id;
+    });
     const adminLoginResponse = await loginUser({
       email: 'admin@email.com',
       password: 'admin1234567'
