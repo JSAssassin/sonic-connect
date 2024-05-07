@@ -33,7 +33,7 @@ app.use('/api/v1/users', userRouter);
 
 app.all('*', (req, res, next) => {
   const e =
-    new CustomError(`Cannot find ${req.originalUrl} on the server.`, 404);
+    new CustomError(`Cannot find "${req.originalUrl}" on the server.`, 404);
   next(e);
 });
 
