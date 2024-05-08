@@ -306,10 +306,10 @@ describe('API /albums', () => {
       });
     test('should throw if the artists is not an array.', async () => {
       const { _id: albumId } = albums[0];
-      // set photo ID to a non existent ID
-      const artistID = '663ad462ca6f48b5c12898ec';
+      const { _id: artistId } = artists[0];
       const updatedAlbum = {
-        artists: artistID
+        // artists not an array
+        artists: artistId
       }
       const response = await updateAlbum({
         token: adminJWT,
