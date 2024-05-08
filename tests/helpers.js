@@ -189,19 +189,24 @@ const createAlbum = async ({ newAlbum, token } = {}) => {
   return response;
 }
 
+const createAlbumData = async ({ newAlbum, artists, token } = {}) => {
+  const albumData = { ...newAlbum };
+  const { body: { data: { file: { id: photo } } } } = await uploadFile({
+    filePath: newAlbum.photo, type: 'image/jpeg', token
+  });
+  albumData.photo = photo;
+  const artistIds = albumData.artists.map(artistName => {
+    const { _id: artistId } = artists.find(
+      artist => artistName === artist.name);
+    return artistId;
+  });
+  albumData.artists = artistIds;
+  return albumData;
+}
+
 const createAlbums = async ({ albums, token, artists }) => {
   const promises = albums.map(async newAlbum => {
-    const albumData = { ...newAlbum };
-    const { body: { data: { file: { id: photo } } } } = await uploadFile({
-      filePath: newAlbum.photo, type: 'image/jpeg', token
-    });
-    albumData.photo = photo;
-    const artistIds = albumData.artists.map(artistName => {
-      const { _id: artistId } = artists.find(
-        artist => artistName === artist.name);
-      return artistId;
-    });
-    albumData.artists = artistIds;
+    const albumData = await createAlbumData({ newAlbum, artists, token });
     const res = await createAlbum({ newAlbum: albumData, token });
     const { body: { data: { album } } } = res;
     return album;
@@ -242,11 +247,67 @@ const updateAlbum = async ({ albumId, token, updatedAlbum } = {}) => {
   return response;
 }
 
+const createSong = async ({ newSong, token } = {}) => {
+  const response = await request(app)
+    .post(`${apiVersion}/songs`)
+    .send(newSong)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const createSongData = async ({ newSong, artists, albums, token } = {}) => {
+  const songData = { ...newSong };
+  if (newSong.photo) {
+    const { body: { data: { file: { id: photo } } } } = await uploadFile({
+      filePath: newSong.photo, type: 'image/jpeg', token
+    });
+    songData.photo = photo;
+  }
+  const { body: { data: { file: { id: audioFile } } } } = await uploadFile({
+    filePath: newSong.audioFile, type: 'audio/mp3', token
+  });
+  songData.audioFile = audioFile;
+  const artistIds = newSong.artists.map(artistName => {
+    const { _id: artistId } = artists.find(
+      artist => artistName === artist.name);
+    return artistId;
+  });
+  songData.artists = artistIds;
+  if (newSong.featuredArtists) {
+    const featuredArtistIds = newSong.featuredArtists.map(
+      featuredArtistName => {
+        const { _id: artistId } = artists.find(
+          artist => featuredArtistName === artist.name);
+        return artistId;
+      });
+    songData.featuredArtists = featuredArtistIds;
+  }
+  if (newSong.albums) {
+    const albumIds = newSong.albums.map(albumTitle => {
+      const { _id: albumId } = albums.find(
+        album => albumTitle === album.title);
+      return albumId;
+    });
+    songData.albums = albumIds;
+  }
+  return songData;
+}
+
+const createSongs = async ({ songs, albums, token, artists }) => {
+  const promises = songs.map(async newSong => {
+    const songData = await createSongData({ newSong, albums, token, artists });
+    const res = await createSong({ newSong: songData, token });
+    const { body: { data: { song } } } = res;
+    return song;
+  });
+  return Promise.all(promises);
+}
+
 export {
-  apiVersion, createAlbum, createAlbums, createArtist, createArtists,
-  deactivateUser, deleteAlbum, deleteArtist, deleteFile, getAlbum, getAlbums,
-  getArtist, getArtists, getUser, getUserProfile, getUsers, loginUser,
-  logoutUser, ping, registerUser, registerUsers, resetPassword,
-  sendPasswordResetRequest, updateAlbum, updateArtist, updatePassword,
-  updateUserProfile, uploadFile
+  apiVersion, createAlbum, createAlbumData, createAlbums, createArtist,
+  createArtists, createSong, createSongData, createSongs, deactivateUser,
+  deleteAlbum, deleteArtist, deleteFile, getAlbum, getAlbums, getArtist,
+  getArtists, getUser, getUserProfile, getUsers, loginUser, logoutUser, ping,
+  registerUser, registerUsers, resetPassword, sendPasswordResetRequest,
+  updateAlbum, updateArtist, updatePassword, updateUserProfile, uploadFile
 };

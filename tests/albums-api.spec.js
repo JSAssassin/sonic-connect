@@ -2,9 +2,9 @@ import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
-  createArtists, createAlbum, createAlbums, deleteAlbum, deleteArtist,
-  deleteFile, getAlbum, getAlbums, loginUser, registerUsers, updateAlbum,
-  uploadFile
+  createArtists, createAlbum, createAlbumData, createAlbums, deleteAlbum,
+  deleteArtist, deleteFile, getAlbum, getAlbums, loginUser, registerUsers,
+  updateAlbum, uploadFile
 } from './helpers.js';
 
 const mockArtists = JSON.parse(fs.readFileSync("./mock-data/artists.json"));
@@ -51,17 +51,10 @@ describe('API /albums', () => {
   });
   describe('POST /albums', () => {
     test('admin should be able create a new album.', async () => {
-      const albumData = { ...mockAlbums[0] };
-      const { body: { data: { file: { id: photo } } } } = await uploadFile({
-        filePath: albumData.photo, type: 'image/jpeg', token: adminJWT
+      const newAlbum = { ...mockAlbums[0] };
+      const albumData = await createAlbumData({
+        newAlbum, artists, token: adminJWT
       });
-      albumData.photo = photo;
-      const artistIds = albumData.artists.map(artistName => {
-        const { _id: artistId } = artists.find(
-          artist => artistName === artist.name);
-        return artistId;
-      });
-      albumData.artists = artistIds;
       const response = await createAlbum({
         token: adminJWT,
         newAlbum: albumData
@@ -73,17 +66,10 @@ describe('API /albums', () => {
     });
     test('should throw if a non-admin user try to create album.',
       async () => {
-        const albumData = { ...mockAlbums[0] };
-        const { body: { data: { file: { id: photo } } } } = await uploadFile({
-          filePath: albumData.photo, type: 'image/jpeg', token: adminJWT
+        const newAlbum = { ...mockAlbums[0] };
+        const albumData = await createAlbumData({
+          newAlbum, artists, token: adminJWT
         });
-        albumData.photo = photo;
-        const artistIds = albumData.artists.map(artistName => {
-          const { _id: artistId } = artists.find(
-            artist => artistName === artist.name);
-          return artistId;
-        });
-        albumData.artists = artistIds;
         const response = await createAlbum({
           token: bobJWT,
           newAlbum: albumData
