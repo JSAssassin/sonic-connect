@@ -252,6 +252,11 @@ describe('API /albums', () => {
       expect(album.title).toBe(updatedAlbum.title);
       expect(album.description).toBe(updatedAlbum.description);
       expect(album.genre).toEqual(updatedAlbum.genre);
+      const albumArtists = album.artists.map(artist => {
+        const { _id: artistId } = artist;
+        return artistId;
+      });
+      expect(albumArtists).toEqual(updatedAlbum.artists);
     });
     test('should throw if a non-admin user try to update album.',
       async () => {
@@ -270,7 +275,7 @@ describe('API /albums', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should throw if a photo ID that an admin tries to update is invalid.',
+    test('should throw if photo ID that admin tries to update is invalid.',
       async () => {
         const { _id: albumId } = albums[0];
         // set photo ID to a non existent ID
@@ -287,10 +292,10 @@ describe('API /albums', () => {
         expect(status).toBe(400);
         expect(message).toContain(`Photo "${photoID}" does not exist.`);
       });
-    test('should throw if the artist ID that an admin tries to update is invalid.',
+    test('should throw if the artist ID that admin tries to update is invalid.',
       async () => {
         const { _id: albumId } = albums[0];
-        // set photo ID to a non existent ID
+        // set artist ID to a non existent ID
         const artistID = '663ad462ca6f48b5c12898ec';
         const updatedAlbum = {
           artists: [artistID]

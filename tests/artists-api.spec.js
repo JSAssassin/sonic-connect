@@ -222,7 +222,7 @@ describe('API /artists', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should throw if a photo ID that an admin tries to update is invalid.',
+    test('should throw if photo ID that admin tries to update is invalid.',
       async () => {
         const { _id: artistId } = artists[0];
         // set photo ID to a non existent ID
