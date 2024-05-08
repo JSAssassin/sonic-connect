@@ -177,10 +177,68 @@ const getArtists = async ({ token } = {}) => {
   return response;
 }
 
+const createAlbum = async ({ newAlbum, token } = {}) => {
+  const response = await request(app)
+    .post(`${apiVersion}/albums`)
+    .send(newAlbum)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const createAlbums = async ({ albums, token, artists }) => {
+  const promises = albums.map(async newAlbum => {
+    const albumData = { ...newAlbum };
+    const { body: { data: { file: { id: photo } } } } = await uploadFile({
+      filePath: newAlbum.photo, type: 'image/jpeg', token
+    });
+    albumData.photo = photo;
+    const artistIds = albumData.artists.map(artistName => {
+      const { _id: artistId } = artists.find(
+        artist => artistName === artist.name);
+      return artistId;
+    });
+    albumData.artists = artistIds;
+    const res = await createAlbum({ newAlbum: albumData, token });
+    const { body: { data: { album } } } = res;
+    return album;
+  });
+  return Promise.all(promises);
+}
+
+const getAlbum = async ({ albumId, token } = {}) => {
+  const response = await request(app)
+    .get(`${apiVersion}/albums/${albumId}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const getAlbums = async ({ token } = {}) => {
+  const response = await request(app)
+    .get(`${apiVersion}/albums`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const deleteAlbum = async ({ albumId, token } = {}) => {
+  const response = await request(app)
+    .delete(`${apiVersion}/albums/${albumId}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const updateAlbum = async ({ albumId, token, updatedAlbum } = {}) => {
+  const response = await request(app)
+    .patch(`${apiVersion}/albums/${albumId}`)
+    .send(updatedAlbum)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 export {
-  apiVersion, createArtist, createArtists, deactivateUser, deleteArtist,
-  deleteFile, getArtist, getArtists, getUser, getUserProfile, getUsers,
-  loginUser, logoutUser, ping, registerUser, registerUsers, resetPassword,
-  sendPasswordResetRequest, updateArtist, updatePassword, updateUserProfile,
-  uploadFile
+  apiVersion, createAlbum, createAlbums, createArtist, createArtists,
+  deactivateUser, deleteAlbum, deleteArtist, deleteFile, getAlbum, getAlbums,
+  getArtist, getArtists, getUser, getUserProfile, getUsers, loginUser,
+  logoutUser, ping, registerUser, registerUsers, resetPassword,
+  sendPasswordResetRequest, updateAlbum, updateArtist, updatePassword,
+  updateUserProfile, uploadFile
 };
