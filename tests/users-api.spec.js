@@ -100,7 +100,7 @@ describe('API /users', () => {
     });
   })
   describe('DELETE /users/profile', () => {
-    test('user should be able to deactivate their account', async () => {
+    test('user should be able to deactivate their account.', async () => {
       // user deactivates their account, this invalidates the JWT token and sets
       // the user's active status to false.
       const deactivateUserResponse = await deactivateUser({ token: aliceJWT });

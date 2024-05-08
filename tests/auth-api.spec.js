@@ -30,6 +30,24 @@ describe('API /auth', () => {
       expect(user).toHaveProperty('name', newUser.name);
       expect(user).toHaveProperty('createdAt', expect.any(String));
     });
+    test('should result in duplicate error if user attempts to register ' +
+      'again with existing email.', async () => {
+        const newUser = {
+          ...users.find(user => user.email === 'bob@email.com')
+        };
+        const response1 = await registerUser({ newUser });
+        const { status: status1, body: { data: { user: user1 } } } = response1;
+        expect(status1).toBe(201);
+        expect(user1).toBeDefined();
+        expect(user1).toHaveProperty('id', expect.any(String));
+        expect(user1).toHaveProperty('name', newUser.name);
+        expect(user1).toHaveProperty('createdAt', expect.any(String));
+        const response2 = await registerUser({ newUser });
+        const { status: status2, body: { message } } = response2;
+        expect(status2).toBe(409);
+        expect(message).toContain(
+          `There is already a record with the email "${newUser.email}"`);
+      });
     test('should throw error if email is not specified.', async () => {
       const newUser = { ...users.find(user => user.email === 'bob@email.com') };
       delete newUser.email;
