@@ -170,10 +170,14 @@ const updateArtist = async ({ artistId, token, updatedArtist } = {}) => {
   return response;
 }
 
-const getArtists = async ({ token } = {}) => {
-  const response = await request(app)
+const getArtists = async ({ token, queryParams } = {}) => {
+  let requestBuilder = request(app)
     .get(`${apiVersion}/artists`)
     .set('Authorization', `Bearer ${token}`);
+  if (queryParams) {
+    requestBuilder = requestBuilder.query(queryParams);
+  }
+  const response = await requestBuilder;
   return response;
 }
 
@@ -212,10 +216,14 @@ const getAlbum = async ({ albumId, token } = {}) => {
   return response;
 }
 
-const getAlbums = async ({ token } = {}) => {
-  const response = await request(app)
+const getAlbums = async ({ token, queryParams } = {}) => {
+  let requestBuilder = request(app)
     .get(`${apiVersion}/albums`)
     .set('Authorization', `Bearer ${token}`);
+  if (queryParams) {
+    requestBuilder = requestBuilder.query(queryParams);
+  }
+  const response = await requestBuilder;
   return response;
 }
 
