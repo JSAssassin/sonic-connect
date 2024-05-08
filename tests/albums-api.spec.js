@@ -140,8 +140,7 @@ describe('API /albums', () => {
         const {
           status: status1,
           body: {
-            count: count1, data: { albums: albums1
-            }
+            count: count1, data: { albums: albums1 }
           }
         } = response;
         expect(status1).toBe(200);
@@ -154,8 +153,7 @@ describe('API /albums', () => {
         const {
           status: status2,
           body: {
-            count: count2, data: { albums: albums2
-            }
+            count: count2, data: { albums: albums2 }
           }
         } = response2;
         expect(status2).toBe(200);

@@ -102,8 +102,7 @@ describe('API /artists', () => {
         const {
           status: status1,
           body: {
-            count: count1, data: { artists: artists1
-            }
+            count: count1, data: { artists: artists1 }
           }
         } = response;
         expect(status1).toBe(200);
@@ -116,8 +115,7 @@ describe('API /artists', () => {
         const {
           status: status2,
           body: {
-            count: count2, data: { artists: artists2
-            }
+            count: count2, data: { artists: artists2 }
           }
         } = response2;
         expect(status2).toBe(200);
