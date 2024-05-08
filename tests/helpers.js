@@ -300,11 +300,45 @@ const createSongs = async ({ songs, albums, token, artists }) => {
   return Promise.all(promises);
 }
 
+const getSong = async ({ songId, token } = {}) => {
+  const response = await request(app)
+    .get(`${apiVersion}/songs/${songId}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const getSongs = async ({ token, queryParams } = {}) => {
+  let requestBuilder = request(app)
+    .get(`${apiVersion}/songs`)
+    .set('Authorization', `Bearer ${token}`);
+  if (queryParams) {
+    requestBuilder = requestBuilder.query(queryParams);
+  }
+  const response = await requestBuilder;
+  return response;
+}
+
+const deleteSong = async ({ songId, token } = {}) => {
+  const response = await request(app)
+    .delete(`${apiVersion}/songs/${songId}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const updateSong = async ({ songId, token, updatedSong } = {}) => {
+  const response = await request(app)
+    .patch(`${apiVersion}/songs/${songId}`)
+    .send(updatedSong)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 export {
   apiVersion, createAlbum, createAlbumData, createAlbums, createArtist,
   createArtists, createSong, createSongData, createSongs, deactivateUser,
-  deleteAlbum, deleteArtist, deleteFile, getAlbum, getAlbums, getArtist,
-  getArtists, getUser, getUserProfile, getUsers, loginUser, logoutUser, ping,
-  registerUser, registerUsers, resetPassword, sendPasswordResetRequest,
-  updateAlbum, updateArtist, updatePassword, updateUserProfile, uploadFile
+  deleteAlbum, deleteArtist, deleteFile, deleteSong, getAlbum, getAlbums,
+  getArtist, getArtists, getSong, getSongs, getUser, getUserProfile, getUsers,
+  loginUser, logoutUser, ping, registerUser, registerUsers, resetPassword,
+  sendPasswordResetRequest, updateAlbum, updateArtist, updatePassword,
+  updateSong, updateUserProfile, uploadFile
 };
