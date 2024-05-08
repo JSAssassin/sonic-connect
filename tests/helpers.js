@@ -111,19 +111,76 @@ const registerUsers = async ({ users }) => {
   return Promise.all(promises);
 }
 
+const uploadFile = async ({ filePath, type, token } = {}) => {
+  const response = await request(app)
+    .post(`${apiVersion}/files/upload`)
+    .attach('file', filePath, { filename: 'file', contentType: type })
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const deleteFile = async ({ filename, token } = {}) => {
+  const response = await request(app)
+    .delete(`${apiVersion}/files/${filename}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const createArtist = async ({ newArtist, token } = {}) => {
+  const response = await request(app)
+    .post(`${apiVersion}/artists`)
+    .send(newArtist)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const createArtists = async ({ artists, token }) => {
+  const promises = artists.map(async newArtist => {
+    const artistData = { ...newArtist };
+    const { body: { data: { file: { id: photo } } } } = await uploadFile({
+      filePath: newArtist.photo, type: 'image/jpeg', token
+    });
+    artistData.photo = photo;
+    const res = await createArtist({ newArtist: artistData, token });
+    const { body: { data: { artist } } } = res;
+    return artist;
+  });
+  return Promise.all(promises);
+}
+
+const getArtist = async ({ artistId, token } = {}) => {
+  const response = await request(app)
+    .get(`${apiVersion}/artists/${artistId}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const deleteArtist = async ({ artistId, token } = {}) => {
+  const response = await request(app)
+    .delete(`${apiVersion}/artists/${artistId}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const updateArtist = async ({ artistId, token, updatedArtist } = {}) => {
+  const response = await request(app)
+    .patch(`${apiVersion}/artists/${artistId}`)
+    .send(updatedArtist)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const getArtists = async ({ token } = {}) => {
+  const response = await request(app)
+    .get(`${apiVersion}/artists`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 export {
-  apiVersion,
-  deactivateUser,
-  getUser,
-  getUserProfile,
-  getUsers,
-  loginUser,
-  logoutUser,
-  ping,
-  registerUser,
-  registerUsers,
-  resetPassword,
-  sendPasswordResetRequest,
-  updatePassword,
-  updateUserProfile
+  apiVersion, createArtist, createArtists, deactivateUser, deleteArtist,
+  deleteFile, getArtist, getArtists, getUser, getUserProfile, getUsers,
+  loginUser, logoutUser, ping, registerUser, registerUsers, resetPassword,
+  sendPasswordResetRequest, updateArtist, updatePassword, updateUserProfile,
+  uploadFile
 };
