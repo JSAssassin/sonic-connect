@@ -127,7 +127,8 @@ describe('API /albums', () => {
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
-        expect(message).toContain('does not exist.');
+        expect(message).toContain(
+          `"artists": "${albumData.artists.join(', ')}" does not exist.`);
       });
   })
   describe('GET /albums', () => {
