@@ -282,13 +282,10 @@ const createSongData = async ({ newSong, artists, albums, token } = {}) => {
       });
     songData.featuredArtists = featuredArtistIds;
   }
-  if (newSong.albums) {
-    const albumIds = newSong.albums.map(albumTitle => {
-      const { _id: albumId } = albums.find(
-        album => albumTitle === album.title);
-      return albumId;
-    });
-    songData.albums = albumIds;
+  if (newSong.album) {
+    const { _id: albumId } = albums.find(
+      album => newSong.album === album.title);
+    songData.album = albumId;
   }
   return songData;
 }
