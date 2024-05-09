@@ -333,26 +333,98 @@ const updateSong = async ({ songId, token, updatedSong } = {}) => {
   return response;
 }
 
-const createPlaylist = async ({
-  playlistTitle, songs, token, isPublic
-} = {}) => {
-  const body = { title: playlistTitle, songs };
+const createPlaylist = async ({ title, songs, token, isPublic } = {}) => {
+  const playlistBody = { title, songs };
   if (isPublic) {
-    body.isPublic = isPublic;
+    playlistBody.isPublic = isPublic;
   }
   const response = await request(app)
     .post(`${apiVersion}/playlists`)
-    .send(body)
+    .send(playlistBody)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+};
+
+const createMockPlaylists = async ({
+  songs, privateArtist, publicArtist, token, user
+} = {}) => {
+  const selectedSongsPrivate = songs
+    .filter(song => song.artists.find(artist => artist.name === privateArtist))
+    .map(song => {
+      const { _id: songId } = song;
+      return songId;
+    });
+  const selectedSongsPublic = songs
+    .filter(song => song.artists.find(artist => artist.name === publicArtist))
+    .map(song => {
+      const { _id: songId } = song;
+      return songId;
+    });
+  const playlists = {};
+  await Promise.all([
+    createPlaylist({
+      title: `${user}'s private playlist`,
+      songs: selectedSongsPrivate,
+      token
+    }).then(response => {
+      const {
+        body: { data: { playlist: { _id: playlistId, title } } }
+      } = response;
+      playlists.privatePlaylist = {
+        playlistId,
+        title
+      };
+    }),
+    createPlaylist({
+      title: `${user}'s public playlist`,
+      songs: selectedSongsPublic,
+      token,
+      isPublic: true
+    }).then(response => {
+      const {
+        body: { data: { playlist: { _id: playlistId, title } } }
+      } = response;
+      playlists.publicPlaylist = {
+        playlistId,
+        title
+      };
+    })
+  ]);
+  return playlists;
+};
+
+const getPlaylist = async ({ playlistId, token } = {}) => {
+  const response = await request(app)
+    .get(`${apiVersion}/playlists/${playlistId}`)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const getPlaylists = async ({ token, queryParams } = {}) => {
+  let requestBuilder = request(app)
+    .get(`${apiVersion}/playlists`)
+    .set('Authorization', `Bearer ${token}`);
+  if (queryParams) {
+    requestBuilder = requestBuilder.query(queryParams);
+  }
+  const response = await requestBuilder;
+  return response;
+}
+
+const deletePlaylist = async ({ playlistId, token } = {}) => {
+  const response = await request(app)
+    .delete(`${apiVersion}/playlists/${playlistId}`)
     .set('Authorization', `Bearer ${token}`);
   return response;
 }
 
 export {
   apiVersion, createAlbum, createAlbumData, createAlbums, createArtist,
-  createArtists, createPlaylist, createSong, createSongData, createSongs,
-  deactivateUser, deleteAlbum, deleteArtist, deleteFile, deleteSong, getAlbum,
-  getAlbums, getArtist, getArtists, getSong, getSongs, getUser, getUserProfile,
-  getUsers, loginUser, logoutUser, ping, registerUser, registerUsers,
-  resetPassword, sendPasswordResetRequest, updateAlbum, updateArtist,
-  updatePassword, updateSong, updateUserProfile, uploadFile
+  createArtists, createMockPlaylists, createPlaylist, createSong,
+  createSongData, createSongs, deactivateUser, deleteAlbum, deleteArtist,
+  deleteFile, deletePlaylist, deleteSong, getAlbum, getAlbums, getArtist,
+  getArtists, getPlaylist, getPlaylists, getSong, getSongs, getUser,
+  getUserProfile, getUsers, loginUser, logoutUser, ping, registerUser,
+  registerUsers, resetPassword, sendPasswordResetRequest, updateAlbum,
+  updateArtist, updatePassword, updateSong, updateUserProfile, uploadFile
 };
