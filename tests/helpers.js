@@ -333,12 +333,26 @@ const updateSong = async ({ songId, token, updatedSong } = {}) => {
   return response;
 }
 
+const createPlaylist = async ({
+  playlistTitle, songs, token, isPublic
+} = {}) => {
+  const body = { title: playlistTitle, songs };
+  if (isPublic) {
+    body.isPublic = isPublic;
+  }
+  const response = await request(app)
+    .post(`${apiVersion}/playlists`)
+    .send(body)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 export {
   apiVersion, createAlbum, createAlbumData, createAlbums, createArtist,
-  createArtists, createSong, createSongData, createSongs, deactivateUser,
-  deleteAlbum, deleteArtist, deleteFile, deleteSong, getAlbum, getAlbums,
-  getArtist, getArtists, getSong, getSongs, getUser, getUserProfile, getUsers,
-  loginUser, logoutUser, ping, registerUser, registerUsers, resetPassword,
-  sendPasswordResetRequest, updateAlbum, updateArtist, updatePassword,
-  updateSong, updateUserProfile, uploadFile
+  createArtists, createPlaylist, createSong, createSongData, createSongs,
+  deactivateUser, deleteAlbum, deleteArtist, deleteFile, deleteSong, getAlbum,
+  getAlbums, getArtist, getArtists, getSong, getSongs, getUser, getUserProfile,
+  getUsers, loginUser, logoutUser, ping, registerUser, registerUsers,
+  resetPassword, sendPasswordResetRequest, updateAlbum, updateArtist,
+  updatePassword, updateSong, updateUserProfile, uploadFile
 };
