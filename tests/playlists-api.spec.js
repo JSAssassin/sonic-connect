@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
   createArtists, createMockPlaylists, createPlaylist, createSongs, createAlbums,
-  deletePlaylist, getPlaylist, getPlaylists, loginUser, registerUsers
+  deletePlaylist, getPlaylist, getPlaylists, loginUser, registerUsers,
+  updatePlaylist
 } from './helpers.js';
 
 const mockArtists = JSON.parse(fs.readFileSync("./mock-data/artists.json"));
@@ -353,7 +354,7 @@ describe('API /playlists', () => {
           `You do not have access to delete the playlist ` +
           `"${publicPlaylist.title}".`);
       });
-    test('should error if you try to delete a playlist that does not exist.',
+    test('should error if user tries to delete a playlist that does not exist.',
       async () => {
         // Get one of Alice's playlist
         const { privatePlaylist } = await createMockPlaylists({
@@ -381,6 +382,190 @@ describe('API /playlists', () => {
         expect(status2).toBe(404);
         expect(message).toContain(
           `Playlist with ID "${privatePlaylist.playlistId}" not found`);
+      });
+  });
+  describe('PATCH /playlists/:playlistId', () => {
+    test('user should be able to update their private playlist by ID',
+      async () => {
+        const { privatePlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const updatedPlaylist = {
+          title: 'My favorite Songs',
+          description: 'These songs are my favorites by Alan Walker.',
+        };
+        const response = await updatePlaylist({
+          playlistId: privatePlaylist.playlistId,
+          updatedPlaylist,
+          token: aliceJWT
+        });
+        const { status, body: { data: { playlist } } } = response;
+        expect(status).toBe(200);
+        expect(playlist).toBeDefined();
+        expect(playlist.title).toBe(updatedPlaylist.title);
+        expect(playlist.description).toBe(updatedPlaylist.description);
+      });
+    test('user should be able to update both their public playlist by ID',
+      async () => {
+        const { publicPlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const selectedSongsPublic = songs
+          .filter(song => song.artists.find(
+            artist => artist.name === 'Ripple'))
+          .map(song => {
+            const { _id: songId } = song;
+            return songId;
+          });
+        const updatedPlaylist = {
+          title: 'My favorite Songs',
+          description: 'These songs are my favorites by Ripple.',
+          songs: selectedSongsPublic
+        };
+        const response = await updatePlaylist({
+          playlistId: publicPlaylist.playlistId,
+          updatedPlaylist,
+          token: aliceJWT
+        });
+        const { status, body: { data: { playlist } } } = response;
+        expect(status).toBe(200);
+        expect(playlist).toBeDefined();
+        expect(playlist.title).toBe(updatedPlaylist.title);
+        expect(playlist.description).toBe(updatedPlaylist.description);
+      });
+    test(`user should not be able to update other users' private playlist `,
+      async () => {
+        const { privatePlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const updatedPlaylist = {
+          title: 'My favorite Songs',
+          description: 'These songs are my favorites by Alan Walker.',
+        };
+        // Bob tries to update Alice's private playlist
+        const response = await updatePlaylist({
+          playlistId: privatePlaylist.playlistId,
+          updatedPlaylist,
+          token: bobJWT
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(403);
+        expect(message).toContain(
+          `do not have access to update the playlist ` +
+          `"${privatePlaylist.title}"`);
+      });
+    test(`user should not be able to update other users' public playlist `,
+      async () => {
+        const { publicPlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const updatedPlaylist = {
+          title: 'My favorite Songs',
+          description: 'These songs are my favorites by Rival.'
+        };
+        // Bob tries to update Alice's public playlist
+        const response = await updatePlaylist({
+          playlistId: publicPlaylist.playlistId,
+          updatedPlaylist,
+          token: bobJWT
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(403);
+        expect(message).toContain(
+          `do not have access to update the playlist ` +
+          `"${publicPlaylist.title}"`);
+      });
+    test('should error if user tries to update playlist that is invalid or ' +
+      'non existent.', async () => {
+        const { privatePlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const updatedPlaylist = {
+          title: 'My favorite Songs',
+          description: 'These songs are my favorites by Alan Walker.',
+        };
+        // intentionally delete playlist before update
+        const response1 = await deletePlaylist({
+          playlistId: privatePlaylist.playlistId,
+          token: aliceJWT
+        });
+        const { status: status1 } = response1;
+        expect(status1).toBe(200);
+        const response2 = await updatePlaylist({
+          playlistId: privatePlaylist.playlistId,
+          updatedPlaylist,
+          token: aliceJWT
+        });
+        const { status: status2, body: { message } } = response2;
+        expect(status2).toBe(404);
+        expect(message).toContain(
+          `Playlist with ID "${privatePlaylist.playlistId}" not found.`);
+      });
+    test('should error if user tries to update playlist with invalid or ' +
+      'non existent songs.', async () => {
+        const { privatePlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const nonExistingSong = '663ad462ca6f48b5c12898ec';
+        const updatedPlaylist = {
+          songs: [nonExistingSong],
+        };
+        const response2 = await updatePlaylist({
+          playlistId: privatePlaylist.playlistId,
+          updatedPlaylist,
+          token: aliceJWT
+        });
+        const { status: status2, body: { message } } = response2;
+        expect(status2).toBe(400);
+        expect(message).toContain(
+          `"songs": "${nonExistingSong}" does not exist.`);
+      });
+    test('should error if all the fields specified to be updated are non ' +
+      'permissiable fields.', async () => {
+        const { privatePlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const updatedPlaylist = {
+          ratings: 9,
+          shared: true
+        };
+        const response = await updatePlaylist({
+          playlistId: privatePlaylist.playlistId,
+          updatedPlaylist,
+          token: aliceJWT
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          `You have not provided any permissible fields for updating`);
       });
   });
 });

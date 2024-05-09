@@ -418,6 +418,14 @@ const deletePlaylist = async ({ playlistId, token } = {}) => {
   return response;
 }
 
+const updatePlaylist = async ({ playlistId, token, updatedPlaylist } = {}) => {
+  const response = await request(app)
+    .patch(`${apiVersion}/playlists/${playlistId}`)
+    .send(updatedPlaylist)
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 export {
   apiVersion, createAlbum, createAlbumData, createAlbums, createArtist,
   createArtists, createMockPlaylists, createPlaylist, createSong,
@@ -426,5 +434,6 @@ export {
   getArtists, getPlaylist, getPlaylists, getSong, getSongs, getUser,
   getUserProfile, getUsers, loginUser, logoutUser, ping, registerUser,
   registerUsers, resetPassword, sendPasswordResetRequest, updateAlbum,
-  updateArtist, updatePassword, updateSong, updateUserProfile, uploadFile
+  updateArtist, uploadFile, updatePassword, updatePlaylist, updateSong,
+  updateUserProfile
 };
