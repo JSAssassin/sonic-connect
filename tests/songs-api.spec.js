@@ -72,7 +72,7 @@ describe('API /songs', () => {
       expect(song).toBeDefined();
       expect(song.name).toBe(mockSongs[0].name);
     });
-    test('should throw if a non-admin user try to create song.',
+    test('should error if a non-admin user try to create song.',
       async () => {
         const newSong = { ...mockSongs[0] };
         const songData = await createSongData({
@@ -87,7 +87,7 @@ describe('API /songs', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should throw if song photo is invalid or non existent.',
+    test('should error if song photo is invalid or non existent.',
       async () => {
         const newSong = { ...mockSongs[0] };
         const songData = await createSongData({
@@ -105,7 +105,7 @@ describe('API /songs', () => {
         expect(status).toBe(400);
         expect(message).toContain(`Photo "${songData.photo}" does not exist.`);
       });
-    test('should throw if artist specified for the song is invalid or ' +
+    test('should error if artist specified for the song is invalid or ' +
       'non existent.', async () => {
         const newSong = { ...mockSongs[0] };
         const songData = await createSongData({
@@ -124,7 +124,7 @@ describe('API /songs', () => {
         expect(message).toContain(
           `"artists": "${songData.artists.join(', ')}" does not exist.`);
       });
-    test('should throw if audio file specified for the song is invalid or ' +
+    test('should error if audio file specified for the song is invalid or ' +
       'non existent.', async () => {
         const newSong = { ...mockSongs[0] };
         const songData = await createSongData({
@@ -143,7 +143,7 @@ describe('API /songs', () => {
         expect(message).toContain(
           `Audio file "${songData.audioFile}" does not exist.`);
       });
-    test('should throw if album specified for the song is invalid or ' +
+    test('should error if album specified for the song is invalid or ' +
       'non existent.', async () => {
         const newSong = { ...mockSongs[3] };
         const songData = await createSongData({
@@ -160,7 +160,7 @@ describe('API /songs', () => {
         expect(message).toContain(
           `Album ID "${songData.album}" does not exist.`);
       });
-    test('should throw if featured artists specified for the song is invalid ' +
+    test('should error if featured artists specified for the song is invalid ' +
       'or non existent.', async () => {
         const newSong = { ...mockSongs[2] };
         const songData = await createSongData({
@@ -263,7 +263,7 @@ describe('API /songs', () => {
       expect(status2).toBe(404);
       expect(message).toContain(`Song with ID "${songId}" not found.`);
     });
-    test('should throw if a non-admin user try to delete a song.',
+    test('should error if a non-admin user try to delete a song.',
       async () => {
         const { _id: songId } = songs[0];
         const response = await deleteSong({
@@ -317,7 +317,7 @@ describe('API /songs', () => {
       expect(songArtists).toEqual(updatedSong.artists);
       expect(songFeaturedArtists).toEqual(updatedSong.featuredArtists);
     });
-    test('should throw if a non-admin user try to update song.',
+    test('should error if a non-admin user try to update song.',
       async () => {
         const { _id: songId } = songs[0];
         const updatedSong = {
@@ -333,7 +333,7 @@ describe('API /songs', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should throw if song photo that admin tries to update is invalid.',
+    test('should error if song photo that admin tries to update is invalid.',
       async () => {
         const { _id: songId } = songs[0];
         // set photo ID to a non existent ID
@@ -350,7 +350,7 @@ describe('API /songs', () => {
         expect(status).toBe(400);
         expect(message).toContain(`Photo "${photoID}" does not exist.`);
       });
-    test('should throw if audio file that admin tries to update is invalid.',
+    test('should error if audio file that admin tries to update is invalid.',
       async () => {
         const { _id: songId } = songs[0];
         // set audio file to a non existent ID
@@ -367,7 +367,7 @@ describe('API /songs', () => {
         expect(status).toBe(400);
         expect(message).toContain(`Audio file "${audioFile}" does not exist.`);
       });
-    test('should throw if song album ID that admin tries to update is invalid.',
+    test('should error if song album ID that admin tries to update is invalid.',
       async () => {
         const { _id: songId } = songs[0];
         // set album to a non existent ID
@@ -384,7 +384,7 @@ describe('API /songs', () => {
         expect(status).toBe(400);
         expect(message).toContain(`Album ID "${album}" does not exist.`);
       });
-    test('should throw if the artist ID that admin tries to update is invalid.',
+    test('should error if the artist ID that admin tries to update is invalid.',
       async () => {
         const { _id: songId } = songs[0];
         // set artist ID to a non existent ID
@@ -401,7 +401,7 @@ describe('API /songs', () => {
         expect(status).toBe(400);
         expect(message).toContain(`"artists": "${artistID}" does not exist.`);
       });
-    test('should throw if the featured artist ID that admin tries to update ' +
+    test('should error if the featured artist ID that admin tries to update ' +
       'is invalid.', async () => {
         const { _id: songId } = songs[0];
         // set artist ID to a non existent ID
@@ -419,7 +419,7 @@ describe('API /songs', () => {
         expect(message).toContain(
           `"featuredArtists": "${featuredArtistID}" does not exist.`);
       });
-    test('should throw if the "artists" is not an array.', async () => {
+    test('should error if the "artists" is not an array.', async () => {
       const { _id: songId } = songs[0];
       const { _id: artistId } = artists[0];
       const updatedSong = {
@@ -435,7 +435,7 @@ describe('API /songs', () => {
       expect(status).toBe(400);
       expect(message).toContain(`"artists" must be an array.`);
     });
-    test('should throw if all the fields specified to be updated are non ' +
+    test('should error if all the fields specified to be updated are non ' +
       'permissiable fields.', async () => {
         const { _id: songId } = songs[0];
         const updatedSong = {

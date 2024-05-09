@@ -48,7 +48,7 @@ describe('API /auth', () => {
         expect(message).toContain(
           `There is already a record with the email "${newUser.email}"`);
       });
-    test('should throw error if email is not specified.', async () => {
+    test('should error if email is not specified.', async () => {
       const newUser = { ...users.find(user => user.email === 'bob@email.com') };
       delete newUser.email;
       const response = await registerUser({ newUser });
@@ -56,7 +56,7 @@ describe('API /auth', () => {
       expect(status).toBe(400);
       expect(message).toContain('Invalid input data:');
     });
-    test('should throw error if password and confirmPassword is not specified.',
+    test('should error if password and confirmPassword is not specified.',
       async () => {
         const newUser =
           { ...users.find(user => user.email === 'bob@email.com') };
@@ -88,14 +88,14 @@ describe('API /auth', () => {
       expect(jwt).toBeDefined();
       expect(user).toHaveProperty('name', newUser.name);
     });
-    test('should throw an error if email/password is not provided for login.',
+    test('should error if email/password is not provided for login.',
       async () => {
         const response = await loginUser({});
         const { status, body: { message } } = response;
         expect(status).toBe(400);
         expect(message).toBe('Please provide your email and password.');
       });
-    test('should throw an error if password is incorrect.', async () => {
+    test('should error if password is incorrect.', async () => {
       // Attempt to log in the user with incorrect password
       const response = await loginUser({
         email: newUser.email,
@@ -105,7 +105,7 @@ describe('API /auth', () => {
       expect(status).toBe(401);
       expect(message).toContain('Incorrect password');
     });
-    test('should throw an error if email does not exist.', async () => {
+    test('should error if email does not exist.', async () => {
       // Attempt to log in the user with incorrect email
       const response = await loginUser({
         email: 'invalid-bob@email.com',
@@ -183,7 +183,7 @@ describe('API /auth', () => {
       expect(jwt).toBeDefined();
       expect(loggedInUser).toHaveProperty('name', newUser.name);
     });
-    test('should throw if email is not provided when user requests to ' +
+    test('should error if email is not provided when user requests to ' +
       'reset password.', async () => {
         // user requests to reset their password
         const response = await sendPasswordResetRequest();
@@ -191,7 +191,7 @@ describe('API /auth', () => {
         expect(status).toBe(400);
         expect(message).toContain('Email is required');
       });
-    test('should throw if email provided  does not exist when user requests ' +
+    test('should error if email provided  does not exist when user requests ' +
       'to reset password.', async () => {
         // user requests to reset their password
         const response = await sendPasswordResetRequest({
@@ -201,7 +201,7 @@ describe('API /auth', () => {
         expect(status).toBe(404);
         expect(message).toContain('Could not find a user for the given email');
       });
-    test('should throw if password reset token is invalid when user attempts ' +
+    test('should error if password reset token is invalid when user attempts ' +
       'to reset password.', async () => {
         passwordResetToken = 'invalid-token';
         const newPassword = 'new-password';
@@ -213,7 +213,7 @@ describe('API /auth', () => {
         expect(message).toContain(
           'Password reset token either expired or is invalid.');
       });
-    test('should throw if new password or confirm password is not provided ' +
+    test('should error if new password or confirm password is not provided ' +
       'when user attempts to reset password.', async () => {
         // user requests to reset their password
         const passwordResetRequestResponse =
@@ -235,7 +235,7 @@ describe('API /auth', () => {
         expect(resetPasswordMessage).toContain(
           'Please enter new password and confirm password.');
       });
-    test('should throw if new password is the same as the old password ' +
+    test('should error if new password is the same as the old password ' +
       'when user attempts to reset password.', async () => {
         // user requests to reset their password
         const passwordResetRequestResponse =

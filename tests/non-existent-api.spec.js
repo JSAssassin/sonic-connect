@@ -4,7 +4,7 @@ import { apiVersion } from './helpers.js';
 import app from '../app.js';
 
 describe('API /non-existent', () => {
-  test('should throw an error when an invalid endpoint is requested.',
+  test('should error when an invalid endpoint is requested.',
     async () => {
       const response = await request(app)
         .get(`${apiVersion}/non-existent`)

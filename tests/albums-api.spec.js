@@ -64,7 +64,7 @@ describe('API /albums', () => {
       expect(album).toBeDefined();
       expect(album.name).toBe(mockAlbums[0].name);
     });
-    test('should throw if a non-admin user try to create album.',
+    test('should error if a non-admin user try to create album.',
       async () => {
         const newAlbum = { ...mockAlbums[0] };
         const albumData = await createAlbumData({
@@ -79,7 +79,7 @@ describe('API /albums', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should throw if album photo is invalid or non existent.',
+    test('should error if album photo is invalid or non existent.',
       async () => {
         const albumData = { ...mockAlbums[0] };
         const { body: { data: { file } } } = await uploadFile({
@@ -104,7 +104,7 @@ describe('API /albums', () => {
         expect(status).toBe(400);
         expect(message).toContain(`Photo "${albumData.photo}" does not exist.`);
       });
-    test('should throw if artist specified for the album is invalid or ' +
+    test('should error if artist specified for the album is invalid or ' +
       'non existent.', async () => {
         const albumData = { ...mockAlbums[0] };
         const { body: { data: { file } } } = await uploadFile({
@@ -211,7 +211,7 @@ describe('API /albums', () => {
       expect(status2).toBe(404);
       expect(message).toContain(`Album with ID "${albumId}" not found.`);
     });
-    test('should throw if a non-admin user try to delete an album.',
+    test('should error if a non-admin user try to delete an album.',
       async () => {
         const { _id: albumId } = albums[0];
         const response = await deleteAlbum({
@@ -258,7 +258,7 @@ describe('API /albums', () => {
       });
       expect(albumArtists).toEqual(updatedAlbum.artists);
     });
-    test('should throw if a non-admin user try to update album.',
+    test('should error if a non-admin user try to update album.',
       async () => {
         const { _id: albumId } = albums[0];
         const updatedAlbum = {
@@ -275,7 +275,7 @@ describe('API /albums', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should throw if photo ID that admin tries to update is invalid.',
+    test('should error if photo ID that admin tries to update is invalid.',
       async () => {
         const { _id: albumId } = albums[0];
         // set photo ID to a non existent ID
@@ -292,7 +292,7 @@ describe('API /albums', () => {
         expect(status).toBe(400);
         expect(message).toContain(`Photo "${photoID}" does not exist.`);
       });
-    test('should throw if the artist ID that admin tries to update is invalid.',
+    test('should error if the artist ID that admin tries to update is invalid.',
       async () => {
         const { _id: albumId } = albums[0];
         // set artist ID to a non existent ID
@@ -309,7 +309,7 @@ describe('API /albums', () => {
         expect(status).toBe(400);
         expect(message).toContain(`"artists": "${artistID}" does not exist.`);
       });
-    test('should throw if the artists is not an array.', async () => {
+    test('should error if the artists is not an array.', async () => {
       const { _id: albumId } = albums[0];
       const { _id: artistId } = artists[0];
       const updatedAlbum = {
@@ -325,7 +325,7 @@ describe('API /albums', () => {
       expect(status).toBe(400);
       expect(message).toContain(`"artists" must be an array.`);
     });
-    test('should throw if all the fields specified to be updated are non ' +
+    test('should error if all the fields specified to be updated are non ' +
       'permissiable fields.', async () => {
         const { _id: albumId } = albums[0];
         const updatedAlbum = {

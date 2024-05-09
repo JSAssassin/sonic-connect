@@ -54,7 +54,7 @@ describe('API /users', () => {
       expect(users).toBeDefined();
       expect(users).toBeInstanceOf(Array);
     });
-    test('should throw when non-admin users try to get all users.',
+    test('should error when non-admin users try to get all users.',
       async () => {
         const response = await getUsers({
           token: bobJWT
@@ -87,7 +87,7 @@ describe('API /users', () => {
         expect(user2).toBeDefined();
         expect(user2.name).toBe('alice');
       });
-    test('should throw if user ID is invalid.', async () => {
+    test('should error if user ID is invalid.', async () => {
       const invalidUserId = 'invalid-id';
       // attempting to get an invalid user id should fail
       const response = await getUser({
@@ -200,7 +200,7 @@ describe('API /users', () => {
       expect(jwt).toBeDefined();
       expect(loggedInUser).toHaveProperty('name', 'alice');
     });
-    test('should throw if no new password is provided.', async () => {
+    test('should error if no new password is provided.', async () => {
       const response = await updatePassword({
         token: aliceJWT,
         currentPassword: 'alice1234567'
@@ -208,7 +208,7 @@ describe('API /users', () => {
       const { status } = response;
       expect(status).toBe(400);
     });
-    test('should throw if current password is not provided.', async () => {
+    test('should error if current password is not provided.', async () => {
       const newPassword = 'new-password';
       const response = await updatePassword({
         token: aliceJWT,
@@ -218,7 +218,7 @@ describe('API /users', () => {
       const { status } = response;
       expect(status).toBe(400);
     });
-    test('should throw if current password is incorrect.', async () => {
+    test('should error if current password is incorrect.', async () => {
       const newPassword = 'new-password';
       const response = await updatePassword({
         token: aliceJWT,
@@ -230,7 +230,7 @@ describe('API /users', () => {
       expect(status).toBe(401);
       expect(message).toContain('The current password you provided is wrong.');
     });
-    test('should throw if new password is the same as the current password.',
+    test('should error if new password is the same as the current password.',
       async () => {
         const newPassword = 'alice1234567';
         const response = await updatePassword({
@@ -263,7 +263,7 @@ describe('API /users', () => {
       expect(user).toHaveProperty('name', 'alice');
       expect(user).toHaveProperty('dob', updatedProfile.dob);
     });
-    test('should throw if user tries to update password using this endpoint.',
+    test('should error if user tries to update password using this endpoint.',
       async () => {
         const updatedProfile = {
           password: 'new-password'
@@ -278,7 +278,7 @@ describe('API /users', () => {
           'You cannot update email, password, role or active status ' +
           'using this endpoint.');
       });
-    test('should throw if user tries to update active status using this ' +
+    test('should error if user tries to update active status using this ' +
       'endpoint.', async () => {
         const updatedProfile = {
           active: false
@@ -293,7 +293,7 @@ describe('API /users', () => {
           'You cannot update email, password, role or active status ' +
           'using this endpoint.');
       });
-    test('should throw if user tries to update email using this endpoint.',
+    test('should error if user tries to update email using this endpoint.',
       async () => {
         const updatedProfile = {
           email: `new-email@email.com`

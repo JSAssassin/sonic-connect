@@ -56,7 +56,7 @@ describe('API /artists', () => {
       expect(artist).toBeDefined();
       expect(artist.name).toBe(mockArtists[0].name);
     });
-    test('should throw if a non-admin user try to create artist.',
+    test('should error if a non-admin user try to create artist.',
       async () => {
         const artistData = { ...mockArtists[0] };
         const { body: { data: { file: { id: photo } } } } = await uploadFile({
@@ -72,7 +72,7 @@ describe('API /artists', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should throw if artist photo is invalid or non existent.',
+    test('should error if artist photo is invalid or non existent.',
       async () => {
         const artistData = { ...mockArtists[0] };
         const { body: { data: { file } } } = await uploadFile({
@@ -173,7 +173,7 @@ describe('API /artists', () => {
       expect(status2).toBe(404);
       expect(message).toContain(`Artist with ID "${artistId}" not found.`);
     });
-    test('should throw if a non-admin user try to delete an artist.',
+    test('should error if a non-admin user try to delete an artist.',
       async () => {
         const { _id: artistId } = artists[0];
         const response = await deleteArtist({
@@ -205,7 +205,7 @@ describe('API /artists', () => {
       expect(artist.genre).toEqual(updatedArtist.genre);
       expect(artist.yearFormed).toBe(updatedArtist.yearFormed);
     });
-    test('should throw if a non-admin user try to update artist.',
+    test('should error if a non-admin user try to update artist.',
       async () => {
         const { _id: artistId } = artists[0];
         const updatedArtist = {
@@ -222,7 +222,7 @@ describe('API /artists', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should throw if photo ID that admin tries to update is invalid.',
+    test('should error if photo ID that admin tries to update is invalid.',
       async () => {
         const { _id: artistId } = artists[0];
         // set photo ID to a non existent ID
@@ -239,7 +239,7 @@ describe('API /artists', () => {
         expect(status).toBe(400);
         expect(message).toContain(`Photo "${photoID}" does not exist.`);
       });
-    test('should throw if all the fields specified to be updated are non ' +
+    test('should error if all the fields specified to be updated are non ' +
       'permissiable fields.', async () => {
         const { _id: artistId } = artists[0];
         const updatedArtist = {
