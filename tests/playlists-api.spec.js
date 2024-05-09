@@ -128,19 +128,19 @@ describe('API /playlists', () => {
           `"songs": "${nonExistingSong}" does not exist.`);
       });
     test('should error if songs is not an array', async () => {
-        const selectedSongsByAlice = songs.filter(song => song.artists.find(
-          artist => artist.name === 'Alan Walker')).map(song => {
-            const { _id: songId } = song;
-            return songId;
-          });
-        const response = await createPlaylist({
-          playlistTitle: 'Favorite Alan Walker Songs',
-          songs: selectedSongsByAlice[0],
-          token: aliceJWT
+      const selectedSongsByAlice = songs.filter(song => song.artists.find(
+        artist => artist.name === 'Alan Walker')).map(song => {
+          const { _id: songId } = song;
+          return songId;
         });
-        const { status, body: { message } } = response;
-        expect(status).toBe(400);
-        expect(message).toContain(`"songs" must be an array.`);
+      const response = await createPlaylist({
+        playlistTitle: 'Favorite Alan Walker Songs',
+        songs: selectedSongsByAlice[0],
+        token: aliceJWT
       });
+      const { status, body: { message } } = response;
+      expect(status).toBe(400);
+      expect(message).toContain(`"songs" must be an array.`);
+    });
   });
 });
