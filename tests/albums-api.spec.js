@@ -50,7 +50,7 @@ describe('API /albums', () => {
     await closeConnection();
   });
   describe('POST /albums', () => {
-    test('admin should be able create a new album.', async () => {
+    test('admin should be able to create a new album.', async () => {
       const newAlbum = { ...mockAlbums[0] };
       const albumData = await createAlbumData({
         newAlbum, artists, token: adminJWT
@@ -191,7 +191,7 @@ describe('API /albums', () => {
       });
   })
   describe('DELETE /albums/:albumId', () => {
-    test('admin should be able delete an album by its ID.', async () => {
+    test('admin should to delete an album by its ID.', async () => {
       const { _id: albumId } = albums[0];
       const response1 = await deleteAlbum({
         albumId,
@@ -225,7 +225,7 @@ describe('API /albums', () => {
       });
   })
   describe('PATCH /albums/:albumId', () => {
-    test('admin should be able update an album by its ID.', async () => {
+    test('admin should be able to update an album by its ID.', async () => {
       const { _id: albumId } = albums[0];
       const updatedArtists = artists
         .filter(

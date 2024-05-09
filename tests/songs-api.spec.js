@@ -58,7 +58,7 @@ describe('API /songs', () => {
     await closeConnection();
   });
   describe('POST /songs', () => {
-    test('admin should be able create a new song.', async () => {
+    test('admin should be able to create a new song.', async () => {
       const newSong = { ...mockSongs[2] };
       const songData = await createSongData({
         newSong, artists, albums, token: adminJWT
@@ -243,7 +243,7 @@ describe('API /songs', () => {
       });
   })
   describe('DELETE /songs/:songId', () => {
-    test('admin should be able delete a song by its ID.', async () => {
+    test('admin should be able to delete a song by its ID.', async () => {
       const { _id: songId } = songs[0];
       const response1 = await deleteSong({
         songId,
@@ -277,7 +277,7 @@ describe('API /songs', () => {
       });
   })
   describe('PATCH /songs/:songId', () => {
-    test('admin should be able update a song by its ID.', async () => {
+    test('admin should be able to update a song by its ID.', async () => {
       const { _id: songId } = songs[2];
       const updatedArtists = artists
         .filter(

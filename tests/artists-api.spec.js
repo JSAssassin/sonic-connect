@@ -41,7 +41,7 @@ describe('API /artists', () => {
     await closeConnection();
   });
   describe('POST /artists', () => {
-    test('admin should be able create new artist.', async () => {
+    test('admin should be able to create new artist.', async () => {
       const artistData = { ...mockArtists[0] };
       const { body: { data: { file: { id: photo } } } } = await uploadFile({
         filePath: artistData.photo, type: 'image/jpeg', token: adminJWT
@@ -153,7 +153,7 @@ describe('API /artists', () => {
       });
   })
   describe('DELETE /artists/:artistId', () => {
-    test('admin should be able delete an artist by its ID.', async () => {
+    test('admin should be able to delete an artist by its ID.', async () => {
       const { _id: artistId } = artists[0];
       const response1 = await deleteArtist({
         artistId,
@@ -187,7 +187,7 @@ describe('API /artists', () => {
       });
   })
   describe('PATCH /artists/:artistId', () => {
-    test('admin should be able update an artist by its ID.', async () => {
+    test('admin should be able to update an artist by its ID.', async () => {
       const { _id: artistId } = artists[0];
       const updatedArtist = {
         yearFormed: 2020,
