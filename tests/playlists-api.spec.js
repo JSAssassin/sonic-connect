@@ -2,9 +2,9 @@ import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
-  createArtists, createMockPlaylists, createPlaylist, createSongs, createAlbums,
-  deletePlaylist, getPlaylist, getPlaylists, loginUser, registerUsers,
-  updatePlaylist
+  addSongsToPlaylist, createArtists, createMockPlaylists, createPlaylist,
+  createSongs, createAlbums, deletePlaylist, getPlaylist, getPlaylists,
+  loginUser, registerUsers, removeSongsFromPlaylist, updatePlaylist
 } from './helpers.js';
 
 const mockArtists = JSON.parse(fs.readFileSync("./mock-data/artists.json"));
@@ -568,4 +568,65 @@ describe('API /playlists', () => {
           `You have not provided any permissible fields for updating`);
       });
   });
+  describe('POST /:playlistId/songs', () => {
+    test('Add additional songs to the existsing list of songs of a playlist',
+      async () => {
+        const { privatePlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const songsToAdd = songs
+          .filter(song => song.artists.find(
+            artist => artist.name === 'Ripple'))
+          .map(song => {
+            const { _id: songId } = song;
+            return songId;
+          });
+        const expectedPlaylistSongs =
+          [...privatePlaylist.songs, ...songsToAdd];
+        const response = await addSongsToPlaylist({
+          playlistId: privatePlaylist.playlistId,
+          token: aliceJWT,
+          songs: songsToAdd
+        });
+        const { status, body: { data: { playlist } } } = response;
+        expect(status).toBe(200);
+        expect(playlist).toBeDefined();
+        const playlistSongs = playlist.songs.map(song => {
+          const { _id: songId } = song;
+          return songId;
+        });
+        expect(playlistSongs).toEqual(expectedPlaylistSongs);
+      });
+  });
+  describe('DELETE /:playlistId/songs', () => {
+    test('Remove a song from the existsing list of songs of a playlist',
+      async () => {
+        const { privatePlaylist } = await createMockPlaylists({
+          songs,
+          privateArtist: 'Alan Walker',
+          publicArtist: 'Rival',
+          token: aliceJWT,
+          user: 'Alice'
+        });
+        const songToRemove = privatePlaylist.songs[0];
+        const expectedPlaylistSongs = privatePlaylist.songs[1];
+        const response = await removeSongsFromPlaylist({
+          playlistId: privatePlaylist.playlistId,
+          token: aliceJWT,
+          songs: [songToRemove]
+        });
+        const { status, body: { data: { playlist } } } = response;
+        expect(status).toBe(200);
+        expect(playlist).toBeDefined();
+        const playlistSongs = playlist.songs.map(song => {
+          const { _id: songId } = song;
+          return songId;
+        });
+        expect(playlistSongs).toEqual([expectedPlaylistSongs]);
+      })
+  })
 });

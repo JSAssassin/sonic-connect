@@ -368,11 +368,17 @@ const createMockPlaylists = async ({
       token
     }).then(response => {
       const {
-        body: { data: { playlist: { _id: playlistId, title } } }
+        body: {
+          data: { playlist: { _id: playlistId, title, songs: playlistSongs } }
+        }
       } = response;
       playlists.privatePlaylist = {
         playlistId,
-        title
+        title,
+        songs: playlistSongs.map(song => {
+          const {_id: songId} = song;
+          return songId;
+        })
       };
     }),
     createPlaylist({
@@ -382,11 +388,17 @@ const createMockPlaylists = async ({
       isPublic: true
     }).then(response => {
       const {
-        body: { data: { playlist: { _id: playlistId, title } } }
+        body: {
+          data: { playlist: { _id: playlistId, title, songs: playlistSongs } }
+        }
       } = response;
       playlists.publicPlaylist = {
         playlistId,
-        title
+        title,
+        songs: playlistSongs.map(song => {
+          const {_id: songId} = song;
+          return songId;
+        })
       };
     })
   ]);
@@ -426,14 +438,30 @@ const updatePlaylist = async ({ playlistId, token, updatedPlaylist } = {}) => {
   return response;
 }
 
+const addSongsToPlaylist = async ({ playlistId, token, songs } = {}) => {
+  const response = await request(app)
+    .post(`${apiVersion}/playlists/${playlistId}/songs`)
+    .send({ songs })
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
+const removeSongsFromPlaylist = async ({ playlistId, token, songs } = {}) => {
+  const response = await request(app)
+    .delete(`${apiVersion}/playlists/${playlistId}/songs`)
+    .send({ songs })
+    .set('Authorization', `Bearer ${token}`);
+  return response;
+}
+
 export {
-  apiVersion, createAlbum, createAlbumData, createAlbums, createArtist,
-  createArtists, createMockPlaylists, createPlaylist, createSong,
+  addSongsToPlaylist, apiVersion, createAlbum, createAlbumData, createAlbums,
+  createArtist, createArtists, createMockPlaylists, createPlaylist, createSong,
   createSongData, createSongs, deactivateUser, deleteAlbum, deleteArtist,
   deleteFile, deletePlaylist, deleteSong, getAlbum, getAlbums, getArtist,
   getArtists, getPlaylist, getPlaylists, getSong, getSongs, getUser,
   getUserProfile, getUsers, loginUser, logoutUser, ping, registerUser,
-  registerUsers, resetPassword, sendPasswordResetRequest, updateAlbum,
-  updateArtist, uploadFile, updatePassword, updatePlaylist, updateSong,
-  updateUserProfile
+  registerUsers, removeSongsFromPlaylist, resetPassword,
+  sendPasswordResetRequest, updateAlbum, updateArtist, uploadFile,
+  updatePassword, updatePlaylist, updateSong, updateUserProfile
 };
