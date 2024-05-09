@@ -191,7 +191,7 @@ describe('API /albums', () => {
       });
   })
   describe('DELETE /albums/:albumId', () => {
-    test('admin should to delete an album by its ID.', async () => {
+    test('admin should be able to delete an album by its ID.', async () => {
       const { _id: albumId } = albums[0];
       const response1 = await deleteAlbum({
         albumId,

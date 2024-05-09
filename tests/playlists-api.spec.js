@@ -227,7 +227,7 @@ describe('API /playlists', () => {
         const { _id: playlist2Id } = playlist2;
         expect(playlist2Id).toBe(publicPlaylist.playlistId);
       });
-    test(`user should to get to other users' public playlist by ID.`,
+    test(`user should be able to get to other users' public playlist by ID.`,
       async () => {
         // Get Alice's public playlist ID
         const { publicPlaylist } = await createMockPlaylists({
