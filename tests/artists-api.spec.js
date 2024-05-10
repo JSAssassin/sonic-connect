@@ -1,8 +1,9 @@
-import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
+import { ObjectId } from 'bson';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
-  loginUser, createArtist, createArtists, deleteArtist, deleteFile, getArtist,
+  loginUser, createArtist, createArtists, deleteArtist, getArtist,
   getArtists, registerUsers, updateArtist, uploadFile
 } from './helpers.js';
 
@@ -13,7 +14,7 @@ describe('API /artists', () => {
   let adminJWT;
   let bobJWT;
   let artists;
-  beforeEach(async () => {
+  beforeAll(async () => {
     await removeAllCollections();
     // create mock users
     await registerUsers({ users: mockUsers });
@@ -29,10 +30,9 @@ describe('API /artists', () => {
     });
     ({ body: { jwt: bobJWT } } = bobLoginResponse);
     expect(bobJWT).toBeDefined();
-    const [, ...artistsData] = mockArtists;
     // create mock artists
     (artists = await createArtists({
-      artists: artistsData,
+      artists: mockArtists,
       token: adminJWT
     }));
   });
@@ -55,6 +55,12 @@ describe('API /artists', () => {
       expect(status).toBe(201);
       expect(artist).toBeDefined();
       expect(artist.name).toBe(mockArtists[0].name);
+      // clean up
+      const { _id: artistId } = artist;
+      await deleteArtist({
+        artistId,
+        token: adminJWT
+      });
     });
     test('should error if a non-admin user try to create artist.',
       async () => {
@@ -75,14 +81,10 @@ describe('API /artists', () => {
     test('should error if artist photo is invalid or non existent.',
       async () => {
         const artistData = { ...mockArtists[0] };
-        const { body: { data: { file } } } = await uploadFile({
-          filePath: artistData.photo, type: 'image/jpeg', token: adminJWT
-        });
-        artistData.photo = file.id;
-        // intentionally delete the artist photo from DB
-        await deleteFile({
-          filename: file.filename, token: adminJWT
-        });
+        // set photo ID to a non existent ID
+        const nonExistentPhotoID = (new ObjectId()).toString();
+        artistData.photo = nonExistentPhotoID;
+
         const response = await createArtist({
           token: adminJWT,
           newArtist: artistData
@@ -175,7 +177,7 @@ describe('API /artists', () => {
     });
     test('should error if a non-admin user try to delete an artist.',
       async () => {
-        const { _id: artistId } = artists[0];
+        const { _id: artistId } = artists[1];
         const response = await deleteArtist({
           artistId,
           token: bobJWT
@@ -188,7 +190,7 @@ describe('API /artists', () => {
   })
   describe('PATCH /artists/:artistId', () => {
     test('admin should be able to update an artist by its ID.', async () => {
-      const { _id: artistId } = artists[0];
+      const { _id: artistId } = artists[1];
       const updatedArtist = {
         yearFormed: 2020,
         genre: [ "r&b", "pop" ]
@@ -201,13 +203,13 @@ describe('API /artists', () => {
       const { status, body: { data: { artist } } } = response;
       expect(status).toBe(200);
       expect(artist).toBeDefined();
-      expect(artist.name).toBe(artists[0].name);
+      expect(artist.name).toBe(artists[1].name);
       expect(artist.genre).toEqual(updatedArtist.genre);
       expect(artist.yearFormed).toBe(updatedArtist.yearFormed);
     });
     test('should error if a non-admin user try to update artist.',
       async () => {
-        const { _id: artistId } = artists[0];
+        const { _id: artistId } = artists[1];
         const updatedArtist = {
           yearFormed: 2020,
           genre: [ "r&b", "pop" ]
@@ -224,11 +226,11 @@ describe('API /artists', () => {
       });
     test('should error if photo ID that admin tries to update is invalid.',
       async () => {
-        const { _id: artistId } = artists[0];
-        // set photo ID to a non existent ID
-        const photoID = '663ad462ca6f48b5c12898ec';
+        const { _id: artistId } = artists[1];
+          // try to update photo to a non existent ID
+          const nonExistentPhotoID = (new ObjectId()).toString();
         const updatedArtist = {
-          photo: photoID
+          photo: nonExistentPhotoID
         }
         const response = await updateArtist({
           token: adminJWT,
@@ -237,11 +239,12 @@ describe('API /artists', () => {
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
-        expect(message).toContain(`Photo "${photoID}" does not exist.`);
+        expect(message).toContain(
+          `Photo "${nonExistentPhotoID}" does not exist.`);
       });
     test('should error if all the fields specified to be updated are non ' +
       'permissiable fields.', async () => {
-        const { _id: artistId } = artists[0];
+        const { _id: artistId } = artists[1];
         const updatedArtist = {
           age: 27,
           hobbies: [ 'singing', 'playing guitar' ]
