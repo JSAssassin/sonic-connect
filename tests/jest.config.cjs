@@ -1,6 +1,6 @@
 module.exports = {
   "verbose": true,
-  "testTimeout": 30000,
+  "testTimeout": 15000,
   "coveragePathIgnorePatterns": [
     "node_modules",
     "tests"
