@@ -12,15 +12,8 @@ async function removeAllCollections() {
 
 async function removePlaylistsCollection() {
   const [{ collections }] = mongooseInstance.connections;
-  const collectionNames = Object.keys(collections);
-  const promises = collectionNames.map(async collectionName => {
-    if(collectionName === 'playlists') {
-      const collection = collections[collectionName];
-      return collection.deleteMany();
-    }
-    return undefined;
-  });
-  await Promise.all(promises);
+  const collection = collections.playlists;
+  return collection.deleteMany();
 }
 
 async function closeConnection() {
