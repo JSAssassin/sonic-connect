@@ -1,10 +1,10 @@
-import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
+import { ObjectId } from 'bson';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
   createArtists, createSong, createSongData, createSongs, createAlbums,
-  deleteAlbum, deleteArtist, deleteFile, deleteSong, getSong, getSongs,
-  loginUser, registerUsers, updateSong
+  deleteSong, getSong, getSongs, loginUser, registerUsers, updateSong
 } from './helpers.js';
 
 const mockArtists = JSON.parse(fs.readFileSync("./mock-data/artists.json"));
@@ -18,7 +18,7 @@ describe('API /songs', () => {
   let artists;
   let albums;
   let songs;
-  beforeEach(async () => {
+  beforeAll(async () => {
     await removeAllCollections();
     // create mock users
     await registerUsers({ users: mockUsers });
@@ -71,6 +71,12 @@ describe('API /songs', () => {
       expect(status).toBe(201);
       expect(song).toBeDefined();
       expect(song.name).toBe(mockSongs[0].name);
+      // clean up, delete the song
+      const { _id: songId } = song;
+      await deleteSong({
+        songId,
+        token: adminJWT
+      });
     });
     test('should error if a non-admin user try to create song.',
       async () => {
@@ -93,10 +99,10 @@ describe('API /songs', () => {
         const songData = await createSongData({
           newSong, artists, albums, token: adminJWT
         });
-        // intentionally delete the song photo from DB
-        await deleteFile({
-          filename: `${songData.photo}.jpeg`, token: adminJWT
-        });
+
+        // intentionally set the song photo to an non existent ID
+        const nonExistentPhotoId = (new ObjectId()).toString();
+        songData.photo = nonExistentPhotoId;
         const response = await createSong({
           token: adminJWT,
           newSong: songData
@@ -111,10 +117,9 @@ describe('API /songs', () => {
         const songData = await createSongData({
           newSong, artists, albums, token: adminJWT
         });
-        // intentionally delete artists from DB
-        const promises = songData.artists.map(
-          async artistId => deleteArtist({ artistId, token: adminJWT }));
-        await Promise.all(promises);
+        // intentionally set the artists to non existent one
+        const nonExistentArtistId = (new ObjectId()).toString();
+        songData.artists = [nonExistentArtistId];
         const response = await createSong({
           token: adminJWT,
           newSong: songData
@@ -130,10 +135,9 @@ describe('API /songs', () => {
         const songData = await createSongData({
           newSong, artists, albums, token: adminJWT
         });
-        // intentionally delete the audio file from DB
-        await deleteFile({
-          filename: `${songData.audioFile}.mp3`, token: adminJWT
-        });
+        // intentionally set the audio file to a non existent one
+        const nonExistentAudioFile = (new ObjectId()).toString();
+        songData.audioFile = nonExistentAudioFile;
         const response = await createSong({
           token: adminJWT,
           newSong: songData
@@ -149,8 +153,9 @@ describe('API /songs', () => {
         const songData = await createSongData({
           newSong, artists, albums, token: adminJWT
         });
-        // intentionally delete the album from DB
-        await deleteAlbum({ albumId: songData.album, token: adminJWT });
+        // intentionally set the song album to a non existent one
+        const nonExistentAlbum = (new ObjectId()).toString();
+        songData.album = nonExistentAlbum;
         const response = await createSong({
           token: adminJWT,
           newSong: songData
@@ -166,12 +171,9 @@ describe('API /songs', () => {
         const songData = await createSongData({
           newSong, artists, albums, token: adminJWT
         });
-        // intentionally delete featured artists from DB
-        const promises = songData.featuredArtists.map(
-          async featuredArtistId => deleteArtist({
-            artistId: featuredArtistId, token: adminJWT
-          }));
-        await Promise.all(promises);
+        // intentionally set the featured artists to non existent one
+        const nonExistentFeaturedArtistId = (new ObjectId()).toString();
+        songData.featuredArtists = [nonExistentFeaturedArtistId];
         const response = await createSong({
           token: adminJWT,
           newSong: songData
@@ -265,7 +267,7 @@ describe('API /songs', () => {
     });
     test('should error if a non-admin user try to delete a song.',
       async () => {
-        const { _id: songId } = songs[0];
+        const { _id: songId } = songs[1];
         const response = await deleteSong({
           songId,
           token: bobJWT
@@ -319,7 +321,7 @@ describe('API /songs', () => {
     });
     test('should error if a non-admin user try to update song.',
       async () => {
-        const { _id: songId } = songs[0];
+        const { _id: songId } = songs[2];
         const updatedSong = {
           genre: ["r&b", "pop"]
         };
@@ -335,79 +337,11 @@ describe('API /songs', () => {
       });
     test('should error if song photo that admin tries to update is invalid.',
       async () => {
-        const { _id: songId } = songs[0];
+        const { _id: songId } = songs[2];
         // set photo ID to a non existent ID
-        const photoID = '663ad462ca6f48b5c12898ec';
+        const nonExistentPhotoID = (new ObjectId()).toString();
         const updatedSong = {
-          photo: photoID
-        }
-        const response = await updateSong({
-          token: adminJWT,
-          songId,
-          updatedSong
-        });
-        const { status, body: { message } } = response;
-        expect(status).toBe(400);
-        expect(message).toContain(`Photo "${photoID}" does not exist.`);
-      });
-    test('should error if audio file that admin tries to update is invalid.',
-      async () => {
-        const { _id: songId } = songs[0];
-        // set audio file to a non existent ID
-        const audioFile = '663ad462ca6f48b5c12898ec';
-        const updatedSong = {
-          audioFile
-        }
-        const response = await updateSong({
-          token: adminJWT,
-          songId,
-          updatedSong
-        });
-        const { status, body: { message } } = response;
-        expect(status).toBe(400);
-        expect(message).toContain(`Audio file "${audioFile}" does not exist.`);
-      });
-    test('should error if song album ID that admin tries to update is invalid.',
-      async () => {
-        const { _id: songId } = songs[0];
-        // set album to a non existent ID
-        const album = '663ad462ca6f48b5c12898ec';
-        const updatedSong = {
-          album
-        }
-        const response = await updateSong({
-          token: adminJWT,
-          songId,
-          updatedSong
-        });
-        const { status, body: { message } } = response;
-        expect(status).toBe(400);
-        expect(message).toContain(`Album ID "${album}" does not exist.`);
-      });
-    test('should error if the artist ID that admin tries to update is invalid.',
-      async () => {
-        const { _id: songId } = songs[0];
-        // set artist ID to a non existent ID
-        const artistID = '663ad462ca6f48b5c12898ec';
-        const updatedSong = {
-          artists: [artistID]
-        }
-        const response = await updateSong({
-          token: adminJWT,
-          songId,
-          updatedSong
-        });
-        const { status, body: { message } } = response;
-        expect(status).toBe(400);
-        expect(message).toContain(`"artists": "${artistID}" does not exist.`);
-      });
-    test('should error if the featured artist ID that admin tries to update ' +
-      'is invalid.', async () => {
-        const { _id: songId } = songs[0];
-        // set artist ID to a non existent ID
-        const featuredArtistID = '663ad462ca6f48b5c12898ec';
-        const updatedSong = {
-          featuredArtists: [featuredArtistID]
+          photo: nonExistentPhotoID
         }
         const response = await updateSong({
           token: adminJWT,
@@ -417,10 +351,82 @@ describe('API /songs', () => {
         const { status, body: { message } } = response;
         expect(status).toBe(400);
         expect(message).toContain(
-          `"featuredArtists": "${featuredArtistID}" does not exist.`);
+          `Photo "${nonExistentPhotoID}" does not exist.`);
+      });
+    test('should error if audio file that admin tries to update is invalid.',
+      async () => {
+        const { _id: songId } = songs[2];
+        // set audio file to a non existent ID
+        const nonExistentAudioFile = (new ObjectId()).toString();
+        const updatedSong = {
+          audioFile: nonExistentAudioFile
+        }
+        const response = await updateSong({
+          token: adminJWT,
+          songId,
+          updatedSong
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          `Audio file "${nonExistentAudioFile}" does not exist.`);
+      });
+    test('should error if song album ID that admin tries to update is invalid.',
+      async () => {
+        const { _id: songId } = songs[2];
+        // set album to a non existent ID
+        const nonExistentAlbum = (new ObjectId()).toString();
+        const updatedSong = {
+          album: nonExistentAlbum
+        }
+        const response = await updateSong({
+          token: adminJWT,
+          songId,
+          updatedSong
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          `Album ID "${nonExistentAlbum}" does not exist.`);
+      });
+    test('should error if the artist ID that admin tries to update is invalid.',
+      async () => {
+        const { _id: songId } = songs[2];
+        // set artist ID to a non existent ID
+        const nonExistentArtist = (new ObjectId()).toString();
+        const updatedSong = {
+          artists: [nonExistentArtist]
+        }
+        const response = await updateSong({
+          token: adminJWT,
+          songId,
+          updatedSong
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          `"artists": "${nonExistentArtist}" does not exist.`);
+      });
+    test('should error if the featured artist ID that admin tries to update ' +
+      'is invalid.', async () => {
+        const { _id: songId } = songs[2];
+        // set featured artist ID to a non existent ID
+        const nonExistentFeaturedArtist = (new ObjectId()).toString();
+        const updatedSong = {
+          featuredArtists: [nonExistentFeaturedArtist]
+        }
+        const response = await updateSong({
+          token: adminJWT,
+          songId,
+          updatedSong
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          `"featuredArtists": "${nonExistentFeaturedArtist}" does not exist.`);
       });
     test('should error if the "artists" is not an array.', async () => {
-      const { _id: songId } = songs[0];
+      const { _id: songId } = songs[2];
       const { _id: artistId } = artists[0];
       const updatedSong = {
         // artists not an array
@@ -437,7 +443,7 @@ describe('API /songs', () => {
     });
     test('should error if all the fields specified to be updated are non ' +
       'permissiable fields.', async () => {
-        const { _id: songId } = songs[0];
+        const { _id: songId } = songs[2];
         const updatedSong = {
           label: 'Example Records',
           rating: 7.5
