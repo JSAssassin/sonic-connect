@@ -113,7 +113,7 @@ describe('API /albums', () => {
           filePath: albumData.photo, type: 'image/jpeg', token: adminJWT
         });
         albumData.photo = file.id;
-        const nonExistentArtistId =  (new ObjectId()).toString();
+        const nonExistentArtistId = (new ObjectId()).toString();
         albumData.artists = [nonExistentArtistId]
         const response = await createAlbum({
           token: adminJWT,

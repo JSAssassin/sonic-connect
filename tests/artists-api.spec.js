@@ -193,7 +193,7 @@ describe('API /artists', () => {
       const { _id: artistId } = artists[1];
       const updatedArtist = {
         yearFormed: 2020,
-        genre: [ "r&b", "pop" ]
+        genre: ["r&b", "pop"]
       };
       const response = await updateArtist({
         token: adminJWT,
@@ -212,7 +212,7 @@ describe('API /artists', () => {
         const { _id: artistId } = artists[1];
         const updatedArtist = {
           yearFormed: 2020,
-          genre: [ "r&b", "pop" ]
+          genre: ["r&b", "pop"]
         }
         const response = await updateArtist({
           token: bobJWT,
@@ -247,7 +247,7 @@ describe('API /artists', () => {
         const { _id: artistId } = artists[1];
         const updatedArtist = {
           age: 27,
-          hobbies: [ 'singing', 'playing guitar' ]
+          hobbies: ['singing', 'playing guitar']
         }
         const response = await updateArtist({
           token: adminJWT,

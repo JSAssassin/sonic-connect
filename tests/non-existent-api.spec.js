@@ -9,7 +9,7 @@ describe('API /non-existent', () => {
       const response = await request(app)
         .get(`${apiVersion}/non-existent`)
         .expect(404);
-      const { body: { message }} = response;
+      const { body: { message } } = response;
       expect(message).toContain(
         `Cannot find "${apiVersion}/non-existent" on the server.`);
     });

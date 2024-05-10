@@ -376,7 +376,7 @@ const createMockPlaylists = async ({
         playlistId,
         title,
         songs: playlistSongs.map(song => {
-          const {_id: songId} = song;
+          const { _id: songId } = song;
           return songId;
         })
       };
@@ -396,7 +396,7 @@ const createMockPlaylists = async ({
         playlistId,
         title,
         songs: playlistSongs.map(song => {
-          const {_id: songId} = song;
+          const { _id: songId } = song;
           return songId;
         })
       };
