@@ -3,8 +3,8 @@ import fs from 'node:fs';
 import { ObjectId } from 'bson';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
-  deactivateUser, getUser, getUsers, loginUser, registerUsers, updatePassword,
-  updateUserProfile
+  deactivateUser, getUser, getUserProfile, getUsers, loginUser, registerUsers,
+  updatePassword, updateUserProfile,
 } from './helpers.js';
 
 const mockUsers = JSON.parse(fs.readFileSync("./mock-data/users.json"));
@@ -259,6 +259,21 @@ describe('API /users', () => {
       expect(user).toHaveProperty('name', 'ori');
       expect(user).toHaveProperty('dob', updatedProfile.dob);
     });
+    test('should error if all the fields specified to be updated are non ' +
+      'permissiable fields.', async () => {
+        const updatedProfile = {
+          age: 24,
+          birth_country: 'USA'
+        };
+        const response = await updateUserProfile({
+          updatedProfile,
+          token: oriJWT
+        });
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
+        expect(message).toContain(
+          `You have not provided any permissible fields for updating`);
+      });
     test('should error if user tries to update password using this endpoint.',
       async () => {
         const updatedProfile = {
@@ -303,6 +318,21 @@ describe('API /users', () => {
         expect(message).toContain(
           'You cannot update email, password, role or active status ' +
           'using this endpoint.');
+      });
+  })
+  describe('GET /users/profile', () => {
+    test('user should be able to get their profile when logged in.',
+      async () => {
+        const response = await getUserProfile({
+          token: oriJWT
+        });
+        const {
+          status, body: { data: { user } }
+        } = response;
+        expect(status).toBe(200);
+        expect(user).toBeDefined();
+        expect(user.name).toBe('ori');
+        expect(user.email).toBe('ori@email.com');
       });
   })
 });

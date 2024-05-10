@@ -10,7 +10,12 @@
     "name": "bob",
     "email": "bob@email.com",
     "password": "bob1234567",
-    "confirmPassword": "bob1234567"
+    "confirmPassword": "bob1234567",
+    "dob": {
+      "year": 1978,
+      "month": 5,
+      "day": 10
+    }
   },
   {
     "name": "alice",
@@ -27,6 +32,11 @@
     "name": "ori",
     "email": "ori@email.com",
     "password": "ori1234567",
-    "confirmPassword": "ori1234567"
+    "confirmPassword": "ori1234567",
+    "dob": {
+      "year": 2000,
+      "month": 9,
+      "day": 9
+    }
   }
 ]
