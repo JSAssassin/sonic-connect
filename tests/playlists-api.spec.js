@@ -1,6 +1,11 @@
-import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
+import {
+  afterAll, afterEach, beforeAll, describe, expect, test
+} from '@jest/globals';
 import fs from 'node:fs';
-import { closeConnection, removeAllCollections } from './test-db-setup.js';
+import { ObjectId } from 'bson';
+import {
+  closeConnection, removeAllCollections, removePlaylistsCollection
+} from './test-db-setup.js';
 import {
   addSongsToPlaylist, createArtists, createMockPlaylists, createPlaylist,
   createSongs, createAlbums, deletePlaylist, getPlaylist, getPlaylists,
@@ -17,7 +22,7 @@ describe('API /playlists', () => {
   let bobJWT;
   let songs;
   let aliceId;
-  beforeEach(async () => {
+  beforeAll(async () => {
     await removeAllCollections();
     // create mock users
     const registeredUsers = await registerUsers({ users: mockUsers });
@@ -61,6 +66,9 @@ describe('API /playlists', () => {
       albums,
       token: adminJWT
     }));
+  });
+  afterEach(async () => {
+    await removePlaylistsCollection();
   });
   afterAll(async () => {
     await removeAllCollections();
@@ -115,23 +123,17 @@ describe('API /playlists', () => {
     });
     test('should error if any song specified in the playlist is invalid',
       async () => {
-        const selectedSongsByAlice = songs.filter(song => song.artists.find(
-          artist => artist.name === 'Alan Walker')).map(song => {
-            const { _id: songId } = song;
-            return songId;
-          });
         // Add an invalid song ID to the selected songs
-        const nonExistingSong = '663ad462ca6f48b5c12898ec';
-        selectedSongsByAlice.push(nonExistingSong);
+        const nonExistentSong = (new ObjectId()).toString();
         const response = await createPlaylist({
           title: 'Favorite Alan Walker Songs',
-          songs: selectedSongsByAlice,
+          songs: [nonExistentSong],
           token: aliceJWT
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
         expect(message).toContain(
-          `"songs": "${nonExistingSong}" does not exist.`);
+          `"songs": "${nonExistentSong}" does not exist.`);
       });
     test('should error if songs is not an array', async () => {
       const selectedSongsByAlice = songs.filter(song => song.artists.find(
@@ -356,32 +358,15 @@ describe('API /playlists', () => {
       });
     test('should error if user tries to delete a playlist that does not exist.',
       async () => {
-        // Get one of Alice's playlist
-        const { privatePlaylist } = await createMockPlaylists({
-          songs,
-          privateArtist: 'Alan Walker',
-          publicArtist: 'Rival',
-          token: aliceJWT,
-          user: 'Alice'
-        });
-        // Delete the playlist
-        const response1 = await deletePlaylist({
-          playlistId: privatePlaylist.playlistId,
+        const nonExistentPlaylist = (new ObjectId()).toString();
+        const response = await deletePlaylist({
+          playlistId: nonExistentPlaylist,
           token: aliceJWT
         });
-        const { status: status1 } = response1;
-        expect(status1).toBe(200);
-        // Try to delete the playlist again
-        const response2 = await deletePlaylist({
-          playlistId: privatePlaylist.playlistId,
-          token: aliceJWT
-        });
-        const {
-          status: status2, body: { message }
-        } = response2;
-        expect(status2).toBe(404);
+        const { status, body: { message } } = response;
+        expect(status).toBe(404);
         expect(message).toContain(
-          `Playlist with ID "${privatePlaylist.playlistId}" not found`);
+          `Playlist with ID "${nonExistentPlaylist}" not found`);
       });
   });
   describe('PATCH /playlists/:playlistId', () => {
@@ -493,33 +478,20 @@ describe('API /playlists', () => {
       });
     test('should error if user tries to update playlist that is invalid or ' +
       'non existent.', async () => {
-        const { privatePlaylist } = await createMockPlaylists({
-          songs,
-          privateArtist: 'Alan Walker',
-          publicArtist: 'Rival',
-          token: aliceJWT,
-          user: 'Alice'
-        });
+        const nonExistentPlaylist = (new ObjectId()).toString();
         const updatedPlaylist = {
           title: 'My favorite Songs',
           description: 'These songs are my favorites by Alan Walker.',
         };
-        // intentionally delete playlist before update
-        const response1 = await deletePlaylist({
-          playlistId: privatePlaylist.playlistId,
-          token: aliceJWT
-        });
-        const { status: status1 } = response1;
-        expect(status1).toBe(200);
-        const response2 = await updatePlaylist({
-          playlistId: privatePlaylist.playlistId,
+        const response = await updatePlaylist({
+          playlistId: nonExistentPlaylist,
           updatedPlaylist,
           token: aliceJWT
         });
-        const { status: status2, body: { message } } = response2;
-        expect(status2).toBe(404);
+        const { status, body: { message } } = response;
+        expect(status).toBe(404);
         expect(message).toContain(
-          `Playlist with ID "${privatePlaylist.playlistId}" not found.`);
+          `Playlist with ID "${nonExistentPlaylist}" not found.`);
       });
     test('should error if user tries to update playlist with invalid or ' +
       'non existent songs.', async () => {
@@ -530,19 +502,19 @@ describe('API /playlists', () => {
           token: aliceJWT,
           user: 'Alice'
         });
-        const nonExistingSong = '663ad462ca6f48b5c12898ec';
+        const nonExistentSong = (new ObjectId()).toString();
         const updatedPlaylist = {
-          songs: [nonExistingSong],
+          songs: [nonExistentSong],
         };
-        const response2 = await updatePlaylist({
+        const response = await updatePlaylist({
           playlistId: privatePlaylist.playlistId,
           updatedPlaylist,
           token: aliceJWT
         });
-        const { status: status2, body: { message } } = response2;
-        expect(status2).toBe(400);
+        const { status, body: { message } } = response;
+        expect(status).toBe(400);
         expect(message).toContain(
-          `"songs": "${nonExistingSong}" does not exist.`);
+          `"songs": "${nonExistentSong}" does not exist.`);
       });
     test('should error if all the fields specified to be updated are non ' +
       'permissiable fields.', async () => {

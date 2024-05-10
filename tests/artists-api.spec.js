@@ -227,8 +227,8 @@ describe('API /artists', () => {
     test('should error if photo ID that admin tries to update is invalid.',
       async () => {
         const { _id: artistId } = artists[1];
-          // try to update photo to a non existent ID
-          const nonExistentPhotoId = (new ObjectId()).toString();
+        // try to update photo to a non existent ID
+        const nonExistentPhotoId = (new ObjectId()).toString();
         const updatedArtist = {
           photo: nonExistentPhotoId
         }
