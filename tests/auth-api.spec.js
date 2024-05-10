@@ -137,6 +137,10 @@ describe('API /auth', () => {
       expect(status).toBe(201);
     });
     test('should successfully reset a user password.', async () => {
+      const { body: { jwt: oldJWT } } = await loginUser({
+        email: newUser.email,
+        password: newUser.password
+      });
       // user requests to reset their password
       const passwordResetRequestResponse =
         await sendPasswordResetRequest({ email: newUser.email });
@@ -168,6 +172,14 @@ describe('API /auth', () => {
       } = loginWithOldPasswordResponse;
       expect(loginWithOldPasswordStatus).toBe(401);
       expect(loginMessage).toContain('Incorrect password');
+      // Attempt to access routes with old jwt should fail as well
+      const getUserProfileResponse = await getUserProfile({ token: oldJWT });
+      const {
+        status: getUserProfileStatus, body: { message: getUserProfileMessage }
+      } = getUserProfileResponse;
+      expect(getUserProfileStatus).toBe(401);
+      expect(getUserProfileMessage).toContain(
+        'The password has been changed recently. Please login again.');
       // Attempt to login with the new password should be successful
       const loginWithNewPasswordResponse = await loginUser({
         email: newUser.email,

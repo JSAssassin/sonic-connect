@@ -65,9 +65,12 @@ const getUser = async ({ userId, token } = {}) => {
 }
 
 const getUserProfile = async ({ token } = {}) => {
-  const response = await request(app)
-    .get(`${apiVersion}/users/profile`)
-    .set('Authorization', `Bearer ${token}`);
+  const requestBuilder = request(app)
+    .get(`${apiVersion}/users/profile`);
+  if(token) {
+    requestBuilder.set('Authorization', `Bearer ${token}`);
+  }
+  const response = await requestBuilder;
   return response;
 }
 

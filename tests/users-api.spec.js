@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
 import { ObjectId } from 'bson';
+import jwt from 'jsonwebtoken';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
   deactivateUser, getUser, getUserProfile, getUsers, loginUser, registerUsers,
@@ -189,11 +190,11 @@ describe('API /users', () => {
       const {
         status: loginWithNewPasswordStatus,
         body: {
-          jwt, data: { user: loggedInUser }
+          jwt: newJwt, data: { user: loggedInUser }
         }
       } = loginWithNewPasswordResponse;
       expect(loginWithNewPasswordStatus).toBe(200);
-      expect(jwt).toBeDefined();
+      expect(newJwt).toBeDefined();
       expect(loggedInUser).toHaveProperty('name', 'bob');
     });
     test('should error if no new password is provided.', async () => {
@@ -326,13 +327,32 @@ describe('API /users', () => {
         const response = await getUserProfile({
           token: oriJWT
         });
-        const {
-          status, body: { data: { user } }
-        } = response;
+        const { status, body: { data: { user } } } = response;
         expect(status).toBe(200);
         expect(user).toBeDefined();
         expect(user.name).toBe('ori');
         expect(user.email).toBe('ori@email.com');
+      });
+    test('should error if user tries to access the route without logging in.',
+      async () => {
+        const response = await getUserProfile();
+        const { status, body: { message } } = response;
+        expect(status).toBe(401);
+        expect(message).toContain('You are not logged in.');
+      });
+    test('should error if user tries to access the route with JWT of a user.' +
+      'that does not exist in the DB.', async () => {
+        const nonExistentUserId = (new ObjectId()).toString();
+        const token = await jwt.sign({
+          userId: nonExistentUserId
+        }, 'mysecretkey', {
+          expiresIn: 86400000,
+        });
+        const response = await getUserProfile({ token });
+        const { status, body: { message } } = response;
+        expect(status).toBe(401);
+        expect(message).toContain(
+          'The user with the given token does not exist.');
       });
   })
 });
