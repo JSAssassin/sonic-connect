@@ -1,5 +1,6 @@
-import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
+import { ObjectId } from 'bson';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
   deactivateUser, getUser, getUsers, loginUser, registerUsers, updatePassword,
@@ -13,7 +14,8 @@ describe('API /users', () => {
   let bobJWT;
   let aliceId;
   let aliceJWT;
-  beforeEach(async () => {
+  let oriJWT;
+  beforeAll(async () => {
     await removeAllCollections();
     // create mock users
     const registeredUsers = await registerUsers({ users: mockUsers });
@@ -38,6 +40,11 @@ describe('API /users', () => {
       password: 'alice1234567'
     });
     ({ body: { jwt: aliceJWT } } = aliceLoginResponse);
+    const oriLoginResponse = await loginUser({
+      email: 'ori@email.com',
+      password: 'ori1234567'
+    });
+    ({ body: { jwt: oriJWT } } = oriLoginResponse);
   });
   afterAll(async () => {
     await removeAllCollections();
@@ -87,43 +94,32 @@ describe('API /users', () => {
         expect(user2).toBeDefined();
         expect(user2.name).toBe('alice');
       });
-    test('should error if user ID is invalid.', async () => {
-      const invalidUserId = 'invalid-id';
+    test('should error if user ID is invalid or non existent.', async () => {
+      const nonExistentUserId = (new ObjectId()).toString();
       // attempting to get an invalid user id should fail
       const response = await getUser({
-        userId: invalidUserId,
+        userId: nonExistentUserId,
         token: adminJWT
       });
       const { status, body: { message } } = response;
-      expect(status).toBe(400);
-      expect(message).toContain(`Invalid value ${invalidUserId} for _id`);
+      expect(status).toBe(404);
+      expect(message).toContain(
+        `User with ID "${nonExistentUserId}" not found.`);
     });
   })
   describe('DELETE /users/profile', () => {
-    test('user should be able to deactivate their account.', async () => {
-      // user deactivates their account, this invalidates the JWT token and sets
-      // the user's active status to false.
-      const deactivateUserResponse = await deactivateUser({ token: aliceJWT });
-      const {
-        status: deactivateUserStatus, body: { message }
-      } = deactivateUserResponse;
-      expect(deactivateUserStatus).toBe(200);
-      expect(message).toContain('account has been deactivated.');
-    });
-    test('user should be able to activate their account by logging in.',
-      async () => {
+    test('user should be able to deactivate their account and reactivate it ' +
+      'by logging in.', async () => {
         // user deactivates their account, this invalidates the JWT token and
         // sets the user's active status to false.
         const deactivateUserResponse = await deactivateUser({
           token: aliceJWT
         });
         const {
-          status: deactivateUserStatus,
-          body: { message: deactivateUserMessage }
+          status: deactivateUserStatus, body: { message }
         } = deactivateUserResponse;
         expect(deactivateUserStatus).toBe(200);
-        expect(deactivateUserMessage).toContain(
-          'account has been deactivated.');
+        expect(message).toContain('account has been deactivated.');
 
         // try to get the deactivated account, this should fail
         const getUserResponse = await getUser({
@@ -163,22 +159,22 @@ describe('API /users', () => {
       const newPassword = 'new-password';
       // this should update the password and logout the user.
       const updatePasswordResponse = await updatePassword({
-        token: aliceJWT,
+        token: bobJWT,
         newPassword,
         confirmPassword: newPassword,
-        currentPassword: 'alice1234567'
+        currentPassword: 'bob1234567'
       });
       const {
         status: updatePasswordStatus, body: { data: { user }, message }
       } = updatePasswordResponse;
       expect(updatePasswordStatus).toBe(200);
       expect(user).toHaveProperty('passwordChangedAt', expect.any(String));
-      expect(user).toHaveProperty('name', 'alice');
+      expect(user).toHaveProperty('name', 'bob');
       expect(message).toContain('Your password has been updated successfully.');
       // user attempts to login using old password, this should fail
       const loginWithOldPasswordResponse = await loginUser({
-        email: 'alice@email.com',
-        password: 'alice1234567'
+        email: 'bob@email.com',
+        password: 'bob1234567'
       });
       const {
         status: loginWithOldPasswordStatus, body: { message: loginMessage }
@@ -187,7 +183,7 @@ describe('API /users', () => {
       expect(loginMessage).toContain('Incorrect password');
       // user attempts to login using new password, this should succeed
       const loginWithNewPasswordResponse = await loginUser({
-        email: 'alice@email.com',
+        email: 'bob@email.com',
         password: newPassword
       });
       const {
@@ -198,12 +194,12 @@ describe('API /users', () => {
       } = loginWithNewPasswordResponse;
       expect(loginWithNewPasswordStatus).toBe(200);
       expect(jwt).toBeDefined();
-      expect(loggedInUser).toHaveProperty('name', 'alice');
+      expect(loggedInUser).toHaveProperty('name', 'bob');
     });
     test('should error if no new password is provided.', async () => {
       const response = await updatePassword({
-        token: aliceJWT,
-        currentPassword: 'alice1234567'
+        token: oriJWT,
+        currentPassword: 'ori1234567'
       });
       const { status } = response;
       expect(status).toBe(400);
@@ -211,7 +207,7 @@ describe('API /users', () => {
     test('should error if current password is not provided.', async () => {
       const newPassword = 'new-password';
       const response = await updatePassword({
-        token: aliceJWT,
+        token: oriJWT,
         newPassword,
         confirmPassword: newPassword,
       });
@@ -221,7 +217,7 @@ describe('API /users', () => {
     test('should error if current password is incorrect.', async () => {
       const newPassword = 'new-password';
       const response = await updatePassword({
-        token: aliceJWT,
+        token: oriJWT,
         newPassword,
         confirmPassword: newPassword,
         currentPassword: 'incorrect-password'
@@ -232,12 +228,12 @@ describe('API /users', () => {
     });
     test('should error if new password is the same as the current password.',
       async () => {
-        const newPassword = 'alice1234567';
+        const newPassword = 'ori1234567';
         const response = await updatePassword({
-          token: aliceJWT,
+          token: oriJWT,
           newPassword,
           confirmPassword: newPassword,
-          currentPassword: 'alice1234567'
+          currentPassword: 'ori1234567'
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
@@ -256,11 +252,11 @@ describe('API /users', () => {
       };
       const response = await updateUserProfile({
         updatedProfile,
-        token: aliceJWT
+        token: oriJWT
       });
       const { status, body: { data: { user } } } = response;
       expect(status).toBe(200);
-      expect(user).toHaveProperty('name', 'alice');
+      expect(user).toHaveProperty('name', 'ori');
       expect(user).toHaveProperty('dob', updatedProfile.dob);
     });
     test('should error if user tries to update password using this endpoint.',
@@ -270,7 +266,7 @@ describe('API /users', () => {
         };
         const response = await updateUserProfile({
           updatedProfile,
-          token: aliceJWT
+          token: oriJWT
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
@@ -285,7 +281,7 @@ describe('API /users', () => {
         };
         const response = await updateUserProfile({
           updatedProfile,
-          token: aliceJWT
+          token: oriJWT
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
@@ -300,7 +296,7 @@ describe('API /users', () => {
         };
         const response = await updateUserProfile({
           updatedProfile,
-          token: aliceJWT
+          token: oriJWT
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
