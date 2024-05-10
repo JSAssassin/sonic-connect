@@ -82,8 +82,8 @@ describe('API /artists', () => {
       async () => {
         const artistData = { ...mockArtists[0] };
         // set photo ID to a non existent ID
-        const nonExistentPhotoID = (new ObjectId()).toString();
-        artistData.photo = nonExistentPhotoID;
+        const nonExistentPhotoId = (new ObjectId()).toString();
+        artistData.photo = nonExistentPhotoId;
 
         const response = await createArtist({
           token: adminJWT,
@@ -228,9 +228,9 @@ describe('API /artists', () => {
       async () => {
         const { _id: artistId } = artists[1];
           // try to update photo to a non existent ID
-          const nonExistentPhotoID = (new ObjectId()).toString();
+          const nonExistentPhotoId = (new ObjectId()).toString();
         const updatedArtist = {
-          photo: nonExistentPhotoID
+          photo: nonExistentPhotoId
         }
         const response = await updateArtist({
           token: adminJWT,
@@ -240,7 +240,7 @@ describe('API /artists', () => {
         const { status, body: { message } } = response;
         expect(status).toBe(400);
         expect(message).toContain(
-          `Photo "${nonExistentPhotoID}" does not exist.`);
+          `Photo "${nonExistentPhotoId}" does not exist.`);
       });
     test('should error if all the fields specified to be updated are non ' +
       'permissiable fields.', async () => {

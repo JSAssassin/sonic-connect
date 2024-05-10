@@ -1,10 +1,11 @@
-import { afterAll, beforeEach, describe, expect, test } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import fs from 'node:fs';
+import { ObjectId } from 'bson';
 import { closeConnection, removeAllCollections } from './test-db-setup.js';
 import {
   createArtists, createAlbum, createAlbumData, createAlbums, deleteAlbum,
-  deleteArtist, deleteFile, getAlbum, getAlbums, loginUser, registerUsers,
-  updateAlbum, uploadFile
+  getAlbum, getAlbums, loginUser, registerUsers, updateAlbum,
+  uploadFile
 } from './helpers.js';
 
 const mockArtists = JSON.parse(fs.readFileSync("./mock-data/artists.json"));
@@ -17,7 +18,7 @@ describe('API /albums', () => {
   let bobJWT;
   let artists;
   let albums;
-  beforeEach(async () => {
+  beforeAll(async () => {
     await removeAllCollections();
     // create mock users
     await registerUsers({ users: mockUsers });
@@ -63,6 +64,12 @@ describe('API /albums', () => {
       expect(status).toBe(201);
       expect(album).toBeDefined();
       expect(album.name).toBe(mockAlbums[0].name);
+      // clean up
+      const { _id: albumId } = album;
+      await deleteAlbum({
+        albumId,
+        token: adminJWT
+      });
     });
     test('should error if a non-admin user try to create album.',
       async () => {
@@ -82,14 +89,8 @@ describe('API /albums', () => {
     test('should error if album photo is invalid or non existent.',
       async () => {
         const albumData = { ...mockAlbums[0] };
-        const { body: { data: { file } } } = await uploadFile({
-          filePath: albumData.photo, type: 'image/jpeg', token: adminJWT
-        });
-        albumData.photo = file.id;
-        // intentionally delete the artist photo from DB
-        await deleteFile({
-          filename: file.filename, token: adminJWT
-        });
+        const nonExistentPhotoId = (new ObjectId()).toString();
+        albumData.photo = nonExistentPhotoId;
         const artistIds = albumData.artists.map(artistName => {
           const { _id: artistId } = artists.find(
             artist => artistName === artist.name);
@@ -102,7 +103,8 @@ describe('API /albums', () => {
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
-        expect(message).toContain(`Photo "${albumData.photo}" does not exist.`);
+        expect(message).toContain(
+          `Photo "${nonExistentPhotoId}" does not exist.`);
       });
     test('should error if artist specified for the album is invalid or ' +
       'non existent.', async () => {
@@ -111,16 +113,8 @@ describe('API /albums', () => {
           filePath: albumData.photo, type: 'image/jpeg', token: adminJWT
         });
         albumData.photo = file.id;
-        const artistIds = albumData.artists.map(artistName => {
-          const { _id: artistId } = artists.find(
-            artist => artistName === artist.name);
-          return artistId;
-        });
-        albumData.artists = artistIds;
-        // intentionally delete artists
-        const promises = albumData.artists.map(
-          async artistId => deleteArtist({ artistId, token: adminJWT }));
-        await Promise.all(promises);
+        const nonExistentArtistId =  (new ObjectId()).toString();
+        albumData.artists = [nonExistentArtistId]
         const response = await createAlbum({
           token: adminJWT,
           newAlbum: albumData
@@ -128,7 +122,7 @@ describe('API /albums', () => {
         const { status, body: { message } } = response;
         expect(status).toBe(400);
         expect(message).toContain(
-          `"artists": "${albumData.artists.join(', ')}" does not exist.`);
+          `"artists": "${nonExistentArtistId}" does not exist.`);
       });
   })
   describe('GET /albums', () => {
@@ -192,7 +186,7 @@ describe('API /albums', () => {
   })
   describe('DELETE /albums/:albumId', () => {
     test('admin should be able to delete an album by its ID.', async () => {
-      const { _id: albumId } = albums[0];
+      const { _id: albumId } = albums[1];
       const response1 = await deleteAlbum({
         albumId,
         token: adminJWT
@@ -275,13 +269,13 @@ describe('API /albums', () => {
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
-    test('should error if photo ID that admin tries to update is invalid.',
-      async () => {
+    test('should error if photo ID that admin tries to update is invalid ' +
+      'or non existent.', async () => {
         const { _id: albumId } = albums[0];
-        // set photo ID to a non existent ID
-        const photoID = '663ad462ca6f48b5c12898ec';
+        // set photo to be updated to a non existent ID
+        const nonExistentPhotoId = (new ObjectId()).toString();
         const updatedAlbum = {
-          photo: photoID
+          photo: nonExistentPhotoId
         }
         const response = await updateAlbum({
           token: adminJWT,
@@ -290,15 +284,16 @@ describe('API /albums', () => {
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
-        expect(message).toContain(`Photo "${photoID}" does not exist.`);
+        expect(message).toContain(
+          `Photo "${nonExistentPhotoId}" does not exist.`);
       });
     test('should error if the artist ID that admin tries to update is invalid.',
       async () => {
         const { _id: albumId } = albums[0];
-        // set artist ID to a non existent ID
-        const artistID = '663ad462ca6f48b5c12898ec';
+        // set artist to be updated to a non existent ID
+        const nonExistentArtistId = (new ObjectId()).toString();
         const updatedAlbum = {
-          artists: [artistID]
+          artists: [nonExistentArtistId]
         }
         const response = await updateAlbum({
           token: adminJWT,
@@ -307,7 +302,8 @@ describe('API /albums', () => {
         });
         const { status, body: { message } } = response;
         expect(status).toBe(400);
-        expect(message).toContain(`"artists": "${artistID}" does not exist.`);
+        expect(message).toContain(
+          `"artists": "${nonExistentArtistId}" does not exist.`);
       });
     test('should error if the artists is not an array.', async () => {
       const { _id: albumId } = albums[0];

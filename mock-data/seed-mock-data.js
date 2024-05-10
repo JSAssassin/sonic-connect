@@ -81,7 +81,7 @@ const createMockArtists = async ({ jwt } = {}) => {
   }
 }
 
-const getArtistID = async ({ queryParams, jwt } = {}) => {
+const getArtistId = async ({ queryParams, jwt } = {}) => {
   const queryString = new URLSearchParams(queryParams).toString();
   const url = `${baseUrl}/artists?${queryString}`;
   const res = await fetch(url, {
@@ -95,7 +95,7 @@ const getArtistID = async ({ queryParams, jwt } = {}) => {
   return artistId;
 }
 
-const getAlbumID = async ({ queryParams, jwt } = {}) => {
+const getAlbumId = async ({ queryParams, jwt } = {}) => {
   const queryString = new URLSearchParams(queryParams).toString();
   const url = `${baseUrl}/albums?${queryString}`;
   const res = await fetch(url, {
@@ -119,7 +119,7 @@ const createMockAlbums = async ({ jwt } = {}) => {
     album.photo = photo;
     const artistPromises = album.artists.map(async artist => {
       const queryParams = { name: artist };
-      return getArtistID({ queryParams, jwt });;
+      return getArtistId({ queryParams, jwt });;
     });
     const artists = await Promise.all(artistPromises);
     album.artists = artists;
@@ -156,21 +156,21 @@ const createMockSongs = async ({ jwt } = {}) => {
     song.audioFile = audioFile;
     const artistPromises = song.artists.map(async artist => {
       const queryParams = { name: artist };
-      return getArtistID({ queryParams, jwt });
+      return getArtistId({ queryParams, jwt });
     });
     const artists = await Promise.all(artistPromises);
     song.artists = artists;
     if (song.featuredArtists) {
       const featuredArtistPromises = song.featuredArtists.map(async artist => {
         const queryParams = { name: artist };
-        return getArtistID({ queryParams, jwt });
+        return getArtistId({ queryParams, jwt });
       });
       const featuredArtists = await Promise.all(featuredArtistPromises);
       song.featuredArtists = featuredArtists;
     }
     if (song.album) {
       const queryParams = { title: song.album };
-      const albumId = await getAlbumID({ queryParams, jwt });
+      const albumId = await getAlbumId({ queryParams, jwt });
       song.album = albumId;
     }
     await fetch(`${baseUrl}/songs`, {

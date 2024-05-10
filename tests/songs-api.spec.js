@@ -339,9 +339,9 @@ describe('API /songs', () => {
       async () => {
         const { _id: songId } = songs[2];
         // set photo ID to a non existent ID
-        const nonExistentPhotoID = (new ObjectId()).toString();
+        const nonExistentPhotoId = (new ObjectId()).toString();
         const updatedSong = {
-          photo: nonExistentPhotoID
+          photo: nonExistentPhotoId
         }
         const response = await updateSong({
           token: adminJWT,
@@ -351,7 +351,7 @@ describe('API /songs', () => {
         const { status, body: { message } } = response;
         expect(status).toBe(400);
         expect(message).toContain(
-          `Photo "${nonExistentPhotoID}" does not exist.`);
+          `Photo "${nonExistentPhotoId}" does not exist.`);
       });
     test('should error if audio file that admin tries to update is invalid.',
       async () => {
