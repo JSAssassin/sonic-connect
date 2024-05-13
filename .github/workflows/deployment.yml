@@ -27,6 +27,7 @@ jobs:
       uses: azure/container-apps-deploy-action@v1
       with:
         appSourcePath: ${{ github.workspace }}
+        imageToBuild: sonicconnectacr.azurecr.io/sonic-connect:latest
         acrName: sonicconnectacr
         acrUsername: ${{ secrets.REGISTRY_USERNAME }}
         acrPassword: ${{ secrets.REGISTRY_PASSWORD }}
