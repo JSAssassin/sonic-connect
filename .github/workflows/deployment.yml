@@ -1,19 +1,16 @@
 name:  sonic-connect-deployment
 
 on:
-  # Automatically trigger it when detected changes in repo
-  push:
-    # Branches to look out for changes on
-    branches:
-      # Listen for changes on main branch
-      [ main ]
-
-  # Allow manually trigger of the jobs
-  workflow_dispatch:
+  workflow_run:
+    workflows: [sonic-connect-gh-actions]
+    types:
+      - completed
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    needs: sonic-connect-gh-actions
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.repository.default_branch == 'main' }}
     steps:
     - name: Checkout GitHub Action
       uses: actions/checkout@v4
