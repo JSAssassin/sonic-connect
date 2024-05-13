@@ -82,7 +82,7 @@ describe('API /albums', () => {
           newAlbum: albumData
         });
         const { status, body: { message } } = response;
-        expect(status).toBe(400);
+        expect(status).toBe(403);
         expect(message).toContain(
           'You do not have to permission to perform this action.');
       });
