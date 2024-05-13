@@ -340,7 +340,7 @@ describe('API /users', () => {
         expect(status).toBe(401);
         expect(message).toContain('You are not logged in.');
       });
-    test('should error if user tries to access the route with JWT of a user.' +
+    test('should error if user tries to access the route with JWT of a user ' +
       'that does not exist in the DB.', async () => {
         const nonExistentUserId = (new ObjectId()).toString();
         const token = await jwt.sign({

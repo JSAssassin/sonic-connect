@@ -1,4 +1,4 @@
-name: sonic-connect-github-actions
+name: sonic-connect github actions
 
 on: [push]
 
