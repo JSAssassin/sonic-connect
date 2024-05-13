@@ -1,4 +1,4 @@
-name:  sonic-connect deployment
+name:  sonic-connect-deployment
 
 on:
   # Automatically trigger it when detected changes in repo
