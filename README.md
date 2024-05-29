@@ -31,6 +31,12 @@ Follow the same steps as above, but to start the application, run:
 npm run prod
 ```
 
+### Mock Data Seeder Script
+
+For seeding databases with mock data for development and testing, use the
+[mock data seeder script](mock-data/SCRIPT_GUIDE.md). This script allows you to
+generate mock users, artists, albums, and songs in the database.
+
 ### Running Tests
 To run the tests, use the following command:
 ```bash
