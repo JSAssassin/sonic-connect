@@ -27,8 +27,8 @@ const createMockUsers = async () => {
 
 const loginMockAdmin = async () => {
   const body = JSON.stringify({
-    email: process.env.ADMIN_EMAIL,
-    password: process.env.ADMIN_PASSWORD
+    email: 'admin@email.com',
+    password: 'admin1234567'
   })
   const res = await fetch(`${baseUrl}/auth/login`, {
     method: 'POST',
