@@ -27,18 +27,20 @@ npm install
 
 Example:
 
-For database creation:
-PORT=3000
-DB_CONN_STR=mongodb://127.0.0.1:27017
-DB_NAME=sonic-connect
-DB_USER=root
-DB_PASSWORD=password
+For database and server configuration:
 
-For JWT creation:
-SECRET_STR=mysecretkey
-LOGIN_EXPIRES=86400000 # 1 day in milliseconds
+    DB_NAME=sonic-connect
+    DB_USER=root
+    DB_PASSWORD=password
+    DB_CONN_STR=mongodb://127.0.0.1:27017
+    PORT=3000
 
-4. Create the database
+For JWT configuration:
+
+    SECRET_STR=mysecretkey
+    LOGIN_EXPIRES=86400000 # 1 day in milliseconds
+
+1. Create the database
 ```bash
 docker compose up -d
 ```
