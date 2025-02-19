@@ -6,6 +6,10 @@ artists/albums.
 
 ### Getting started
 
+Requirements
+* Node
+* Docker
+
 To set up the app in a development environment:
 
 1. Clone the repository from GitHub:
@@ -19,23 +23,46 @@ cd sonic-connect
 npm install
 ```
 
-3. Start the application:
+3. create a .env file
+
+Example:
+
+For database creation:
+PORT=3000
+DB_CONN_STR=mongodb://127.0.0.1:27017
+DB_NAME=sonic-connect
+DB_USER=root
+DB_PASSWORD=password
+
+For JWT creation:
+SECRET_STR=mysecretkey
+LOGIN_EXPIRES=86400000 # 1 day in milliseconds
+
+4. Create the database
+```bash
+docker compose up -d
+```
+
+Note: The database must be set up before running the application, as it is required for both development and testing.
+
+Optional (Seed DB with mock data)
+    see script for instructions [mock data seeder script](mock-data/SCRIPT_GUIDE.md)
+
+5. At this point you can run the app
 ```bash
 npm run dev
 ```
 
-To set up the app in a production environment:
-
-Follow the same steps as above, but to start the application, run:
-```bash
-npm run prod
-```
-
-### Mock Data Seeder Script
-
-For seeding databases with mock data for development and testing, use the
-[mock data seeder script](mock-data/SCRIPT_GUIDE.md). This script allows you to
-generate mock users, artists, albums, and songs in the database.
+6. To run the app in a production environment, you can do it in one of 2 ways:
+   1. You can run
+    ```bash
+    npm run prod
+    ```
+   2. Build docker image
+    ```bash
+    docker build -t sonic-connect .
+    docker run sonic-connect
+    ```
 
 ### Running Tests
 To run the tests, use the following command:
